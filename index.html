@@ -132,7 +132,12 @@ tr:hover td{background:var(--bg);}
 .grondplan-toolbar{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .grondplan-canvas-wrap{overflow:auto;background:#f0f2f5;padding:24px;min-height:400px;}
 #grondplan-canvas{position:relative;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,.08);border:1px solid #d1d5db;}
-.gp-rek{position:absolute;user-select:none;}
+.gp-rek{position:absolute;user-select:none;cursor:pointer;}
+.gp-rek.selected>.gp-rek-inner{box-shadow:0 0 0 2px #00DFA3,0 2px 12px rgba(0,223,163,.25)!important;}
+.gp-rek.selected{cursor:grab;}
+.gp-rek.selected:active{cursor:grabbing;}
+.gp-ctrl-btn{background:var(--dark);color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:12px;cursor:pointer;transition:background .15s;}
+.gp-ctrl-btn:hover{background:#00DFA3;color:var(--dark);}
 .gp-rek-inner{border-radius:4px;overflow:visible;border:2px solid var(--dark);position:relative;}
 .gp-rek-header{background:var(--dark);color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;padding:4px 8px;display:flex;align-items:center;justify-content:space-between;white-space:nowrap;border-radius:2px 2px 0 0;}
 .gp-rek-body{display:flex;background:#f8f9fa;overflow:hidden;}
@@ -144,28 +149,11 @@ tr:hover td{background:var(--bg);}
 .gp-slot.bezet{background:#d1fae5;}
 .gp-slot:last-child{border-right:none;}
 .gp-laag-row:last-child .gp-slot{border-bottom:none;}
-.gp-unlock-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;cursor:pointer;border-radius:3px;}
-.gp-rek-inner:hover .gp-unlock-overlay{opacity:1;}
-.gp-unlock-btn{background:#fff;color:var(--dark);border:none;border-radius:6px;padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer;pointer-events:none;}
-.gp-rek.unlocked{cursor:grab;}
-.gp-rek.unlocked:active{cursor:grabbing;}
-.gp-rek.unlocked .gp-rek-inner{box-shadow:0 0 0 2px #00DFA3,0 4px 16px rgba(0,223,163,.3);}
-.gp-rek.unlocked .gp-unlock-overlay{display:none!important;}
+.gp-rek-inner:hover{box-shadow:0 0 0 2px rgba(0,223,163,.4);}
 .niet-geplaatst-badge{display:inline-block;background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;cursor:pointer;margin-left:4px;}
 .niet-geplaatst-badge:hover{background:#FDE68A;}
 .gp-grid-line{position:absolute;pointer-events:none;}
-/* Resize & rotate controls - only visible when unlocked */
-.gp-controls{position:absolute;top:-28px;left:0;display:none;gap:4px;align-items:center;white-space:nowrap;z-index:10;}
-.gp-rek.unlocked .gp-controls{display:flex;}
-.gp-ctrl-btn{background:var(--dark);color:#fff;border:none;border-radius:4px;padding:3px 7px;font-size:10px;cursor:pointer;transition:background .15s;}
-.gp-ctrl-btn:hover{background:#00DFA3;color:var(--dark);}
-.gp-ctrl-btn.active{background:#00DFA3;color:var(--dark);}
-.gp-resize-handle{position:absolute;width:10px;height:10px;background:#00DFA3;border:2px solid #fff;border-radius:2px;display:none;z-index:20;}
-.gp-rek.unlocked .gp-resize-handle{display:block;}
-.gp-resize-handle.se{bottom:-5px;right:-5px;cursor:se-resize;}
-.gp-resize-handle.sw{bottom:-5px;left:-5px;cursor:sw-resize;}
-.gp-resize-handle.ne{top:-5px;right:-5px;cursor:ne-resize;}
-.gp-resize-handle.nw{top:-5px;left:-5px;cursor:nw-resize;}
+
 </style>
 </head>
 <body>
@@ -966,19 +954,26 @@ async function deleteLev(id){
 
 
 // ── GRONDPLAN ──
+
+// gpPending: live edits not yet saved {rekId: {x,y,schaal,rotatie}}
+var gpPending = {};
+var gpSelectedRek = null; // currently selected rek id
+
 function renderGrondplan(){
-  const tabsEl=document.getElementById('gebouw-tabs');
-  const contentEl=document.getElementById('grondplan-content');
-  const emptyEl=document.getElementById('grondplan-empty');
+  var tabsEl=document.getElementById('gebouw-tabs');
+  var contentEl=document.getElementById('grondplan-content');
+  var emptyEl=document.getElementById('grondplan-empty');
   if(!gebouwen.length){tabsEl.innerHTML='';contentEl.innerHTML='';emptyEl.style.display='block';return;}
   emptyEl.style.display='none';
   if(!activeGebouwId||!gebouwen.find(function(g){return g.id===activeGebouwId;}))activeGebouwId=gebouwen[0].id;
+
   var tabHtml='';
   gebouwen.forEach(function(g){
-    tabHtml+='<div class="gebouw-tab'+(g.id===activeGebouwId?' active':'')+'" onclick="switchGebouw(this)" data-id="'+g.id+'">'+g.naam+'</div>';
+    tabHtml+='<div class="gebouw-tab'+(g.id===activeGebouwId?' active':'')+'" data-id="'+g.id+'" onclick="switchGebouw(this)">'+g.naam+'</div>';
   });
   tabHtml+='<button class="btn-sm" onclick="openGebouwModal()">+ Gebouw</button>';
   tabsEl.innerHTML=tabHtml;
+
   var geb=gebouwen.find(function(g){return g.id===activeGebouwId;});
   if(!geb)return;
   gpScale=Math.min(820/geb.breedte,820/geb.lengte,22);
@@ -987,64 +982,88 @@ function renderGrondplan(){
   var cH=Math.round(geb.lengte*gpScale);
   var geplaatst=rekPosities.filter(function(p){return p.gebouw_id===activeGebouwId;}).map(function(p){return p.rek_id;});
   var ongeplaatst=rekken.filter(function(r){return !geplaatst.includes(r.id);});
-  var ongeplaatHtml='';
+
+  var onHtml='';
   if(ongeplaatst.length){
-    ongeplaatHtml='<span style="font-size:12px;color:var(--muted)">Nog plaatsen:</span>';
-    ongeplaatst.forEach(function(r){ongeplaatHtml+='<span class="niet-geplaatst-badge" data-rekid="'+r.id+'" onclick="plaatsRek(this.dataset.rekid)">'+r.naam+'</span>';});
-  }else{ongeplaatHtml='<span style="font-size:12px;color:#0a8a63">&#10003; Alle rekken geplaatst</span>';}
+    onHtml='<span style="font-size:12px;color:var(--muted)">Nog plaatsen:</span>';
+    ongeplaatst.forEach(function(r){onHtml+='<span class="niet-geplaatst-badge" data-rekid="'+r.id+'" onclick="plaatsRek(this.dataset.rekid)">'+r.naam+'</span>';});
+  }else{onHtml='<span style="font-size:12px;color:#0a8a63">&#10003; Alle rekken geplaatst</span>';}
+
+  var hasPending=Object.keys(gpPending).length>0;
+
   contentEl.innerHTML=
     '<div class="grondplan-wrap">'+
     '<div class="grondplan-toolbar">'+
-    '<span style="font-size:13px;font-weight:600">'+geb.naam+'</span>'+
-    '<span style="font-size:12px;color:var(--muted)">'+geb.breedte+'m \xd7 '+geb.lengte+'m</span>'+
-    '<span style="font-size:12px;color:var(--muted)">Schaal: 1m = '+Math.round(gpScale)+'px</span>'+
-    '<button class="btn-sm" data-gid="'+geb.id+'" onclick="openGebouwModal(this.dataset.gid)">&#9998; Bewerken</button>'+
-    '<button class="btn-danger" data-gid="'+geb.id+'" onclick="deleteGebouw(this.dataset.gid)">&#10005; Verwijder</button>'+
-    ongeplaatHtml+
+      '<span style="font-size:13px;font-weight:600">'+geb.naam+'</span>'+
+      '<span style="font-size:12px;color:var(--muted)">'+geb.breedte+'m \xd7 '+geb.lengte+'m</span>'+
+      '<button class="btn-sm" data-gid="'+geb.id+'" onclick="openGebouwModal(this.dataset.gid)">&#9998; Bewerken</button>'+
+      '<button class="btn-danger" data-gid="'+geb.id+'" onclick="deleteGebouw(this.dataset.gid)">&#10005; Verwijder</button>'+
+      onHtml+
+      '<div style="margin-left:auto;display:flex;gap:8px;align-items:center">'+
+        '<button id="gp-save-btn" class="btn-green" style="'+(hasPending?'':'opacity:.4;pointer-events:none')+'" onclick="saveGrondplan()">&#10003; Opslaan</button>'+
+        '<button class="btn-ghost" onclick="cancelGrondplan()">Annuleer</button>'+
+      '</div>'+
     '</div>'+
-    '<div class="grondplan-canvas-wrap"><div id="grondplan-canvas" style="width:'+cW+'px;height:'+cH+'px"></div></div>'+
-    '<div style="padding:10px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)">&#128274; Hover op een rek en klik <strong>Verplaatsen</strong> om het te ontgrendelen. Positie wordt automatisch opgeslagen bij loslaten.</div>'+
+    '<div id="gp-editbar" style="display:none;padding:10px 16px;background:#fffbeb;border-bottom:1px solid #fde68a;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+      '<span id="gp-editbar-naam" style="font-weight:600;font-size:13px"></span>'+
+      '<button class="gp-ctrl-btn" onclick="roteerSelected(-90)">&#8634; Links</button>'+
+      '<button class="gp-ctrl-btn" onclick="roteerSelected(90)">&#8635; Rechts</button>'+
+      '<button class="gp-ctrl-btn" onclick="schaalSelected(0.25)">&#43; Groter</button>'+
+      '<button class="gp-ctrl-btn" onclick="schaalSelected(-0.25)">&#8722; Kleiner</button>'+
+      '<span id="gp-editbar-info" style="font-size:12px;color:#92400e;background:#fef3c7;padding:2px 8px;border-radius:4px"></span>'+
+      '<button class="btn-sm" style="margin-left:auto" onclick="deselectRek()">&#10005; Deselecteer</button>'+
+    '</div>'+
+    '<div class="grondplan-canvas-wrap"><div id="grondplan-canvas" style="width:'+cW+'px;height:'+cH+'px" onclick="onCanvasClick(event)"></div></div>'+
+    '<div style="padding:10px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)">Klik op een rek om het te selecteren. Sleep om te verplaatsen. Gebruik de toolbar voor roteren en schalen. Klik <strong>Opslaan</strong> om op te slaan.</div>'+
     '</div>';
+
   buildGpCanvas(geb,cW,cH);
+  updateEditbar();
 }
 
 function buildGpCanvas(geb,cW,cH){
   var canvas=document.getElementById('grondplan-canvas');
   if(!canvas)return;
-  var step=5;
-  for(var x=0;x<=geb.breedte;x+=step){
+  // Grid
+  for(var x=0;x<=geb.breedte;x+=5){
     var px=Math.round(x*gpScale);
     var d=document.createElement('div');d.className='gp-grid-line';
     d.style.cssText='left:'+px+'px;top:0;width:1px;height:'+cH+'px;background:'+(x%10===0?'#cbd5e1':'#e2e8f0')+';';
     canvas.appendChild(d);
     if(x>0&&x<geb.breedte){var l=document.createElement('div');l.style.cssText='position:absolute;left:'+(px+2)+'px;top:2px;font-size:9px;color:#94a3b8;pointer-events:none;';l.textContent=x+'m';canvas.appendChild(l);}
   }
-  for(var y=0;y<=geb.lengte;y+=step){
+  for(var y=0;y<=geb.lengte;y+=5){
     var py=Math.round(y*gpScale);
     var d2=document.createElement('div');d2.className='gp-grid-line';
     d2.style.cssText='top:'+py+'px;left:0;height:1px;width:'+cW+'px;background:'+(y%10===0?'#cbd5e1':'#e2e8f0')+';';
     canvas.appendChild(d2);
     if(y>0&&y<geb.lengte){var l2=document.createElement('div');l2.style.cssText='position:absolute;top:'+(py+2)+'px;left:2px;font-size:9px;color:#94a3b8;pointer-events:none;';l2.textContent=y+'m';canvas.appendChild(l2);}
   }
+  // Rekken
   rekPosities.filter(function(p){return p.gebouw_id===activeGebouwId;}).forEach(function(pos){
     var rek=rekken.find(function(r){return r.id===pos.rek_id;});
     if(!rek)return;
-    addGpRek(canvas,rek,pos,geb);
+    var pending=gpPending[rek.id];
+    var effectPos=pending?Object.assign({},pos,pending):pos;
+    addGpRek(canvas,rek,effectPos,geb);
   });
 }
 
 function addGpRek(canvas,rek,pos,geb){
   var el=document.createElement('div');
-  var isUnlocked=gpUnlocked.has(rek.id);
-  el.className='gp-rek'+(isUnlocked?' unlocked':'');
+  var isSelected=gpSelectedRek===rek.id;
+  el.className='gp-rek'+(isSelected?' selected':'');
   el.id='gp-rek-'+rek.id;
+  el.dataset.rekid=rek.id;
   var schaal=pos.schaal||1;
   var rotatie=pos.rotatie||0;
   el.style.left=Math.round(pos.x*gpScale)+'px';
   el.style.top=Math.round(pos.y*gpScale)+'px';
+
   var allSlots=rek.secties.flatMap(function(s){return s.slots;});
   var bez=allSlots.filter(function(s){return s.artikel_id;}).length;
   var pct=allSlots.length?Math.round(bez/allSlots.length*100):0;
+
   var secHtml='';
   rek.secties.forEach(function(sec){
     var rijen='';
@@ -1059,149 +1078,161 @@ function addGpRek(canvas,rek,pos,geb){
     }
     secHtml+='<div class="gp-sectie-col"><div class="gp-sectie-label">'+rek.naam+sec.sectie_nr+'</div>'+rijen+'</div>';
   });
-  var overlayHtml='<div class="gp-unlock-overlay" data-rekid="'+rek.id+'" onclick="unlockRek(this.dataset.rekid,event)"><span class="gp-unlock-btn">&#128275; Bewerken / verplaatsen</span></div>';
-  var ctrlHtml='<div class="gp-controls">'+
-    '<button class="gp-ctrl-btn" title="Roteer links (-90)" data-rekid="'+rek.id+'" onclick="roteerRek(this.dataset.rekid,-90,event)">&#8634;</button>'+
-    '<button class="gp-ctrl-btn" title="Roteer rechts (+90)" data-rekid="'+rek.id+'" onclick="roteerRek(this.dataset.rekid,90,event)">&#8635;</button>'+
-    '<button class="gp-ctrl-btn" title="Groter" data-rekid="'+rek.id+'" onclick="schaalRek(this.dataset.rekid,0.25,event)">+</button>'+
-    '<button class="gp-ctrl-btn" title="Kleiner" data-rekid="'+rek.id+'" onclick="schaalRek(this.dataset.rekid,-0.25,event)">&#8722;</button>'+
-    '<span style="font-size:10px;color:#555;background:#f0f0f0;padding:2px 6px;border-radius:3px">'+Math.round(schaal*100)+'% | '+rotatie+'&#176;</span>'+
-    '<button class="gp-ctrl-btn" title="Vergrendelen" data-rekid="'+rek.id+'" onclick="lockRek(this.dataset.rekid,event)">&#128274;</button>'+
-    '</div>';
-  var resizeHtml='<div class="gp-resize-handle se" data-rekid="'+rek.id+'"></div>';
-  var innerStyle='transform:rotate('+rotatie+'deg);transform-origin:top left;display:inline-block;';
-  var bodyStyle='transform:scale('+schaal+');transform-origin:top left;display:inline-flex;';
-  el.innerHTML=ctrlHtml+
-    '<div class="gp-rek-inner" style="'+innerStyle+'">'+
+
+  el.innerHTML=
+    '<div class="gp-rek-inner" style="transform:rotate('+rotatie+'deg);transform-origin:top left;display:inline-block;">'+
       '<div class="gp-rek-header"><span>'+rek.naam+'</span><span style="font-size:9px;opacity:.7">'+pct+'%</span></div>'+
-      '<div class="gp-rek-body" style="'+bodyStyle+'">'+secHtml+'</div>'+
-      overlayHtml+
-    '</div>'+
-    resizeHtml;
+      '<div class="gp-rek-body" style="transform:scale('+schaal+');transform-origin:top left;display:inline-flex;">'+secHtml+'</div>'+
+    '</div>';
+
   canvas.appendChild(el);
   setupGpDrag(el,rek.id,geb);
-  setupGpResize(el,rek.id,geb);
 }
 
-function unlockRek(rekId,e){
-  e.stopPropagation();
-  var rek=rekken.find(function(r){return r.id===rekId;});
-  if(!confirm('Rek '+(rek?rek.naam:'')+' bewerken? Je kunt het daarna verplaatsen, roteren en schalen.'))return;
-  gpUnlocked.add(rekId);
+function onCanvasClick(e){
+  if(e.target===document.getElementById('grondplan-canvas')){
+    deselectRek();
+  }
+}
+
+function selectRek(rekId){
+  gpSelectedRek=rekId;
+  // update visual
+  document.querySelectorAll('.gp-rek').forEach(function(el){
+    el.classList.toggle('selected', el.dataset.rekid===rekId);
+  });
+  updateEditbar();
+}
+
+function deselectRek(){
+  gpSelectedRek=null;
+  document.querySelectorAll('.gp-rek').forEach(function(el){el.classList.remove('selected');});
+  updateEditbar();
+}
+
+function updateEditbar(){
+  var bar=document.getElementById('gp-editbar');
+  if(!bar)return;
+  if(!gpSelectedRek){
+    bar.style.display='none';
+    return;
+  }
+  bar.style.display='flex';
+  var rek=rekken.find(function(r){return r.id===gpSelectedRek;});
+  var pos=rekPosities.find(function(p){return p.rek_id===gpSelectedRek&&p.gebouw_id===activeGebouwId;});
+  var pending=gpPending[gpSelectedRek]||{};
+  var schaal=pending.schaal!==undefined?pending.schaal:(pos?pos.schaal||1:1);
+  var rotatie=pending.rotatie!==undefined?pending.rotatie:(pos?pos.rotatie||0:0);
+  var naam=document.getElementById('gp-editbar-naam');
+  var info=document.getElementById('gp-editbar-info');
+  if(naam)naam.textContent='Rek '+(rek?rek.naam:'');
+  if(info)info.textContent=Math.round(schaal*100)+'% | '+rotatie+'\u00b0';
+  // Update save button
+  var hasPending=Object.keys(gpPending).length>0;
+  var saveBtn=document.getElementById('gp-save-btn');
+  if(saveBtn){saveBtn.style.opacity=hasPending?'1':'0.4';saveBtn.style.pointerEvents=hasPending?'auto':'none';}
+}
+
+function getPendingOrPos(rekId){
+  var pos=rekPosities.find(function(p){return p.rek_id===rekId&&p.gebouw_id===activeGebouwId;})||{schaal:1,rotatie:0,x:1,y:1};
+  return Object.assign({},pos,gpPending[rekId]||{});
+}
+
+function setPending(rekId,updates){
+  if(!gpPending[rekId])gpPending[rekId]={};
+  Object.assign(gpPending[rekId],updates);
+  // Live update element
   var el=document.getElementById('gp-rek-'+rekId);
-  if(el)el.classList.add('unlocked');
+  if(!el)return;
+  var cur=getPendingOrPos(rekId);
+  var inner=el.querySelector('.gp-rek-inner');
+  var body=el.querySelector('.gp-rek-body');
+  if(inner)inner.style.transform='rotate('+cur.rotatie+'deg)';
+  if(body)body.style.transform='scale('+cur.schaal+')';
+  if(updates.x!==undefined)el.style.left=Math.round(cur.x*gpScale)+'px';
+  if(updates.y!==undefined)el.style.top=Math.round(cur.y*gpScale)+'px';
+  updateEditbar();
+  // enable save btn
+  var saveBtn=document.getElementById('gp-save-btn');
+  if(saveBtn){saveBtn.style.opacity='1';saveBtn.style.pointerEvents='auto';}
 }
 
-function lockRek(rekId,e){
-  e.stopPropagation();
-  gpUnlocked.delete(rekId);
-  var el=document.getElementById('gp-rek-'+rekId);
-  if(el)el.classList.remove('unlocked');
-  showToast('Rek vergrendeld');
+function roteerSelected(delta){
+  if(!gpSelectedRek)return;
+  var cur=getPendingOrPos(gpSelectedRek);
+  var nieuweRot=((cur.rotatie||0)+delta+360)%360;
+  setPending(gpSelectedRek,{rotatie:nieuweRot});
 }
 
-async function roteerRek(rekId,delta,e){
-  e.stopPropagation();
-  var pos=rekPosities.find(function(p){return p.rek_id===rekId&&p.gebouw_id===activeGebouwId;});
-  if(!pos)return;
-  var nieuweRot=((pos.rotatie||0)+delta+360)%360;
-  await sb.from('wms_rek_posities').update({rotatie:nieuweRot}).eq('rek_id',rekId).eq('gebouw_id',activeGebouwId);
-  await loadGebouwen();
-  renderGrondplan();
-  showToast('Geroteerd: '+nieuweRot+'\u00b0');
-}
-
-async function schaalRek(rekId,delta,e){
-  e.stopPropagation();
-  var pos=rekPosities.find(function(p){return p.rek_id===rekId&&p.gebouw_id===activeGebouwId;});
-  if(!pos)return;
-  var nieuweSchaal=Math.max(0.25,Math.min(4,Math.round(((pos.schaal||1)+delta)*100)/100));
-  await sb.from('wms_rek_posities').update({schaal:nieuweSchaal}).eq('rek_id',rekId).eq('gebouw_id',activeGebouwId);
-  await loadGebouwen();
-  renderGrondplan();
-  showToast('Schaal: '+Math.round(nieuweSchaal*100)+'%');
+function schaalSelected(delta){
+  if(!gpSelectedRek)return;
+  var cur=getPendingOrPos(gpSelectedRek);
+  var nieuweSchaal=Math.max(0.25,Math.min(4,Math.round(((cur.schaal||1)+delta)*100)/100));
+  setPending(gpSelectedRek,{schaal:nieuweSchaal});
 }
 
 function setupGpDrag(el,rekId,geb){
   var dragging=false,sx=0,sy=0,ox=0,oy=0;
   el.addEventListener('mousedown',function(e){
-    if(!gpUnlocked.has(rekId))return;
-    if(e.target.classList.contains('gp-ctrl-btn')||e.target.classList.contains('gp-resize-handle')||e.target.classList.contains('gp-unlock-overlay'))return;
+    if(e.button!==0)return;
+    selectRek(rekId);
     dragging=true;sx=e.clientX;sy=e.clientY;
     ox=parseInt(el.style.left)||0;oy=parseInt(el.style.top)||0;
-    el.style.zIndex=200;e.preventDefault();
+    el.style.zIndex=200;e.stopPropagation();e.preventDefault();
   });
   document.addEventListener('mousemove',function(e){
-    if(!dragging||!gpUnlocked.has(rekId))return;
-    el.style.left=Math.max(0,ox+e.clientX-sx)+'px';
-    el.style.top=Math.max(0,oy+e.clientY-sy)+'px';
+    if(!dragging||gpSelectedRek!==rekId)return;
+    var nx=Math.max(0,ox+e.clientX-sx);
+    var ny=Math.max(0,oy+e.clientY-sy);
+    el.style.left=nx+'px';
+    el.style.top=ny+'px';
   });
-  document.addEventListener('mouseup',async function(e){
-    if(!dragging||!gpUnlocked.has(rekId))return;
+  document.addEventListener('mouseup',function(e){
+    if(!dragging||gpSelectedRek!==rekId)return;
     dragging=false;el.style.zIndex='';
     var rawX=(parseInt(el.style.left)||0)/gpScale;
     var rawY=(parseInt(el.style.top)||0)/gpScale;
-    var clampX=Math.max(0,Math.min(Math.round(rawX*2)/2,geb.breedte-1));
-    var clampY=Math.max(0,Math.min(Math.round(rawY*2)/2,geb.lengte-1));
+    var snapX=Math.round(rawX*2)/2;
+    var snapY=Math.round(rawY*2)/2;
+    var clampX=Math.max(0,Math.min(snapX,geb.breedte-1));
+    var clampY=Math.max(0,Math.min(snapY,geb.lengte-1));
     el.style.left=Math.round(clampX*gpScale)+'px';
     el.style.top=Math.round(clampY*gpScale)+'px';
-    await sb.from('wms_rek_posities').update({x:clampX,y:clampY}).eq('rek_id',rekId).eq('gebouw_id',activeGebouwId);
-    await loadGebouwen();
-    showToast('Positie opgeslagen \u2713');
+    setPending(rekId,{x:clampX,y:clampY});
   });
 }
 
-function setupGpResize(el,rekId,geb){
-  var handle=el.querySelector('.gp-resize-handle.se');
-  if(!handle)return;
-  var resizing=false,sx=0,origSchaal=1;
-  handle.addEventListener('mousedown',function(e){
-    if(!gpUnlocked.has(rekId))return;
-    resizing=true;sx=e.clientX;
-    var pos=rekPosities.find(function(p){return p.rek_id===rekId&&p.gebouw_id===activeGebouwId;});
-    origSchaal=pos?(pos.schaal||1):1;
-    e.stopPropagation();e.preventDefault();
+async function saveGrondplan(){
+  if(!Object.keys(gpPending).length){showToast('Niets te bewaren',true);return;}
+  var promises=[];
+  Object.keys(gpPending).forEach(function(rekId){
+    var upd=gpPending[rekId];
+    promises.push(sb.from('wms_rek_posities').update(upd).eq('rek_id',rekId).eq('gebouw_id',activeGebouwId));
   });
-  document.addEventListener('mousemove',function(e){
-    if(!resizing)return;
-    var nieuweSchaal=Math.max(0.25,Math.min(4,Math.round((origSchaal+(e.clientX-sx)/120)*100)/100));
-    var body=el.querySelector('.gp-rek-body');
-    if(body)body.style.transform='scale('+nieuweSchaal+')';
-    var lbl=el.querySelector('.gp-controls span');
-    if(lbl){
-      var pos=rekPosities.find(function(p){return p.rek_id===rekId&&p.gebouw_id===activeGebouwId;});
-      var rot=pos?(pos.rotatie||0):0;
-      lbl.textContent=Math.round(nieuweSchaal*100)+'% | '+rot+'\u00b0';
-    }
-  });
-  document.addEventListener('mouseup',async function(e){
-    if(!resizing)return;
-    resizing=false;
-    var body=el.querySelector('.gp-rek-body');
-    var nieuweSchaal=origSchaal;
-    if(body){
-      var t=body.style.transform;
-      var m=t.replace('scale(','').replace(')','');
-      if(m)nieuweSchaal=parseFloat(m)||origSchaal;
-    }
-    nieuweSchaal=Math.max(0.25,Math.min(4,Math.round(nieuweSchaal*100)/100));
-    await sb.from('wms_rek_posities').update({schaal:nieuweSchaal}).eq('rek_id',rekId).eq('gebouw_id',activeGebouwId);
-    await loadGebouwen();
-    renderGrondplan();
-    showToast('Formaat: '+Math.round(nieuweSchaal*100)+'%');
-  });
+  await Promise.all(promises);
+  gpPending={};
+  await loadGebouwen();
+  renderGrondplan();
+  showToast('Grondplan opgeslagen \u2713');
+}
+
+function cancelGrondplan(){
+  gpPending={};
+  gpSelectedRek=null;
+  renderGrondplan();
+  showToast('Wijzigingen geannuleerd');
 }
 
 async function plaatsRek(rekId){
   if(rekPosities.find(function(p){return p.rek_id===rekId&&p.gebouw_id===activeGebouwId;})){showToast('Al geplaatst',true);return;}
   await sb.from('wms_rek_posities').insert({rek_id:rekId,gebouw_id:activeGebouwId,x:1,y:1,schaal:1,rotatie:0});
   await loadGebouwen();
-  gpUnlocked.add(rekId);
+  gpSelectedRek=rekId;
   renderGrondplan();
-  showToast('Rek geplaatst \u2014 sleep naar de juiste plek');
+  showToast('Rek geplaatst \u2014 sleep naar de juiste plek en sla op');
 }
 
-function switchGebouw(el){activeGebouwId=el.dataset.id;gpUnlocked.clear();renderGrondplan();}
+function switchGebouw(el){gpPending={};gpSelectedRek=null;activeGebouwId=el.dataset.id;renderGrondplan();}
 
 function openGebouwModal(id){
   var g=id?gebouwen.find(function(x){return x.id===id;}):null;
