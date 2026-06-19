@@ -133,7 +133,7 @@ tr:hover td{background:var(--bg);}
 .grondplan-canvas-wrap{overflow:auto;background:#f0f2f5;padding:24px;min-height:400px;}
 #grondplan-canvas{position:relative;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,.08);border:1px solid #d1d5db;}
 .gp-rek{position:absolute;user-select:none;}
-.gp-rek-inner{border-radius:4px;overflow:hidden;border:2px solid var(--dark);display:inline-block;}
+.gp-rek-inner{border-radius:4px;overflow:hidden;border:2px solid var(--dark);display:inline-block;transform-origin:top left;}
 .gp-rek-header{background:var(--dark);color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;padding:4px 8px;display:flex;align-items:center;justify-content:space-between;white-space:nowrap;}
 .gp-rek-body{display:inline-flex;background:#f8f9fa;}
 .gp-sectie-col{border-right:1px solid #dee2e6;flex-shrink:0;}
@@ -1111,13 +1111,14 @@ function addGpRek(canvas,rek,pos,geb){
     '<div class="gp-handle e" data-rekid="'+rek.id+'" data-dir="e"></div>'+
     '<div class="gp-handle w" data-rekid="'+rek.id+'" data-dir="w"></div>';
 
+  // Rotate the wrapper, scale the entire inner (border+header+body all scale together)
   var wrapStyle='position:relative;display:inline-block;transform:rotate('+rotatie+'deg);transform-origin:top left;';
-  var bodyStyle='transform:scaleX('+schaalX+') scaleY('+schaalY+');transform-origin:top left;display:inline-flex;';
+  var innerStyle='transform:scaleX('+schaalX+') scaleY('+schaalY+');transform-origin:top left;display:inline-block;';
 
   el.innerHTML='<div class="gp-rek-wrap" style="'+wrapStyle+'">'+
-    '<div class="gp-rek-inner">'+
+    '<div class="gp-rek-inner" style="'+innerStyle+'">'+
       '<div class="gp-rek-header"><span>'+rek.naam+'</span><span style="font-size:9px;opacity:.7">'+pct+'%</span></div>'+
-      '<div class="gp-rek-body" style="'+bodyStyle+'">'+secHtml+'</div>'+
+      '<div class="gp-rek-body">'+secHtml+'</div>'+
     '</div>'+
     lockOverlay+handles+
     '</div>';
@@ -1179,9 +1180,9 @@ function setPending(rekId,updates){
   var el=document.getElementById('gp-rek-'+rekId);if(!el)return;
   var cur=getPendingOrPos(rekId);
   var wrap=el.querySelector('.gp-rek-wrap');
-  var body=el.querySelector('.gp-rek-body');
+  var inner=el.querySelector('.gp-rek-inner');
   if(wrap)wrap.style.transform='rotate('+cur.rotatie+'deg)';
-  if(body)body.style.transform='scaleX('+(cur.schaalX||cur.schaal||1)+') scaleY('+(cur.schaalY||cur.schaal||1)+')';
+  if(inner)inner.style.transform='scaleX('+(cur.schaalX||cur.schaal||1)+') scaleY('+(cur.schaalY||cur.schaal||1)+')';
   if(updates.x!==undefined)el.style.left=Math.round(cur.x*gpScale)+'px';
   if(updates.y!==undefined)el.style.top=Math.round(cur.y*gpScale)+'px';
   updateEditbar();
@@ -1265,9 +1266,9 @@ function setupGpHandles(el,rekId,geb){
       if(dir==='n'||dir==='ne'||dir==='nw')dsy=-dy/60;
       var newSx=Math.max(0.1,Math.min(5,Math.round((origSx+dsx)*100)/100));
       var newSy=Math.max(0.1,Math.min(5,Math.round((origSy+dsy)*100)/100));
-      var body=el.querySelector('.gp-rek-body');
-      if(body)body.style.transform='scaleX('+newSx+') scaleY('+newSy+')';
-      // update info labels live
+      var inner=el.querySelector('.gp-rek-inner');
+      if(inner)inner.style.transform='scaleX('+newSx+') scaleY('+newSy+')';
+      el.dataset.liveSx=newSx;el.dataset.liveSy=newSy;
       var infoSx=document.getElementById('gp-info-sx');
       var infoSy=document.getElementById('gp-info-sy');
       if(infoSx)infoSx.textContent=Math.round(newSx*100)+'%';
@@ -1275,13 +1276,9 @@ function setupGpHandles(el,rekId,geb){
     });
     document.addEventListener('mouseup',function(e){
       if(!resizing)return;resizing=false;
-      var body=el.querySelector('.gp-rek-body');
-      if(!body)return;
-      var t=body.style.transform;
-      var msx=t.match(/scaleX\(([^)]+)\)/);
-      var msy=t.match(/scaleY\(([^)]+)\)/);
-      var newSx=msx?parseFloat(msx[1]):origSx;
-      var newSy=msy?parseFloat(msy[1]):origSy;
+      // Read current scale from data attributes set during mousemove
+      var newSx=parseFloat(el.dataset.liveSx||origSx);
+      var newSy=parseFloat(el.dataset.liveSy||origSy);
       setPending(rekId,{schaalX:Math.round(newSx*100)/100,schaalY:Math.round(newSy*100)/100});
     });
   });
