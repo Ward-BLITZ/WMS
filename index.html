@@ -8,564 +8,154 @@
 <style>
   :root {
     --green: #00DFA3;
+    --green-light: #e6fdf7;
+    --green-mid: rgba(0,223,163,0.15);
     --dark: #1D252D;
-    --mid: #2a3540;
-    --surface: #232d36;
-    --border: rgba(255,255,255,0.07);
-    --text: #D9D9D6;
-    --muted: #7a8a95;
-    --white: #FFFFFF;
-    --red: #ff4d6d;
-    --yellow: #f9c846;
+    --bg: #F5F6F8;
+    --surface: #FFFFFF;
+    --surface2: #F0F1F4;
+    --border: #E2E4EA;
+    --text: #1D252D;
+    --muted: #6B7280;
+    --red: #EF4444;
+    --red-light: #FEF2F2;
+    --yellow: #F59E0B;
     --radius: 10px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; min-height: 100vh; }
 
-  body {
-    background: var(--dark);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    min-height: 100vh;
-  }
-
-  /* ── TOPBAR ── */
-  .topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 28px;
-    height: 60px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 18px;
-    color: var(--white);
-  }
+  /* TOPBAR */
+  .topbar { background: var(--dark); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; height: 60px; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 10px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; color: #fff; }
   .logo-dot { width: 10px; height: 10px; background: var(--green); border-radius: 50%; }
   .logo span { color: var(--green); }
-  .topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .user-badge {
-    background: var(--mid);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 5px 12px;
-    font-size: 13px;
-    color: var(--muted);
-  }
-  .btn-logout {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    border-radius: 6px;
-    padding: 5px 12px;
-    cursor: pointer;
-    font-size: 13px;
-    transition: all 0.2s;
-  }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .user-badge { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 5px 12px; font-size: 13px; color: #ccc; }
+  .btn-logout { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #aaa; border-radius: 6px; padding: 5px 12px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
   .btn-logout:hover { color: var(--red); border-color: var(--red); }
 
-  /* ── LOGIN ── */
-  #login-screen {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--dark);
-  }
-  .login-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 48px 40px;
-    width: 360px;
-  }
-  .login-logo {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 22px;
-    color: var(--white);
-    margin-bottom: 6px;
-  }
+  /* LOGIN */
+  #login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); }
+  .login-box { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 48px 40px; width: 360px; box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
+  .login-logo { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px; color: var(--dark); margin-bottom: 6px; }
   .login-logo span { color: var(--green); }
-  .login-sub {
-    color: var(--muted);
-    font-size: 13px;
-    margin-bottom: 32px;
-  }
-  .field-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
-  }
-  .field-input {
-    width: 100%;
-    background: var(--mid);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    color: var(--white);
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    margin-bottom: 16px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
+  .login-sub { color: var(--muted); font-size: 13px; margin-bottom: 32px; }
+  .field-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .field-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; margin-bottom: 16px; outline: none; transition: border-color 0.2s; }
   .field-input:focus { border-color: var(--green); }
-  .btn-primary {
-    width: 100%;
-    background: var(--green);
-    color: var(--dark);
-    border: none;
-    border-radius: 8px;
-    padding: 11px;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
+  .btn-primary { width: 100%; background: var(--green); color: var(--dark); border: none; border-radius: 8px; padding: 11px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: opacity 0.2s; }
   .btn-primary:hover { opacity: 0.88; }
-  .login-error {
-    color: var(--red);
-    font-size: 13px;
-    margin-top: 12px;
-    display: none;
-  }
+  .login-error { color: var(--red); font-size: 13px; margin-top: 12px; display: none; }
 
-  /* ── MAIN LAYOUT ── */
+  /* LAYOUT */
   #app { display: none; }
-  .layout {
-    display: flex;
-    height: calc(100vh - 60px);
-  }
+  .layout { display: flex; height: calc(100vh - 60px); }
 
-  /* ── SIDEBAR ── */
-  .sidebar {
-    width: 220px;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    padding: 20px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    flex-shrink: 0;
-    overflow-y: auto;
-  }
-  .sidebar-section {
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--muted);
-    padding: 10px 8px 4px;
-    margin-top: 8px;
-  }
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text);
-    transition: all 0.15s;
-    border: 1px solid transparent;
-  }
-  .nav-item:hover { background: var(--mid); }
-  .nav-item.active {
-    background: rgba(0, 223, 163, 0.1);
-    color: var(--green);
-    border-color: rgba(0, 223, 163, 0.2);
-  }
+  /* SIDEBAR */
+  .sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; overflow-y: auto; }
+  .sidebar-section { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); padding: 10px 8px 4px; margin-top: 8px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--muted); transition: all 0.15s; border: 1px solid transparent; }
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.active { background: var(--green-light); color: var(--dark); border-color: rgba(0,223,163,0.3); font-weight: 600; }
   .nav-icon { font-size: 16px; width: 20px; text-align: center; }
 
-  /* ── CONTENT ── */
-  .content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 28px;
-  }
+  /* CONTENT */
+  .content { flex: 1; overflow-y: auto; padding: 28px; }
 
-  /* ── PAGE HEADER ── */
-  .page-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 24px;
-  }
-  .page-title {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 22px;
-    color: var(--white);
-    margin-bottom: 4px;
-  }
+  /* PAGE HEADER */
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+  .page-title { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px; color: var(--dark); margin-bottom: 4px; }
   .page-sub { color: var(--muted); font-size: 13px; }
 
-  /* ── BUTTONS ── */
-  .btn-green {
-    background: var(--green);
-    color: var(--dark);
-    border: none;
-    border-radius: 8px;
-    padding: 9px 18px;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    font-size: 13px;
-    cursor: pointer;
-    transition: opacity 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
+  /* BUTTONS */
+  .btn-green { background: var(--green); color: var(--dark); border: none; border-radius: 8px; padding: 9px 18px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 13px; cursor: pointer; transition: opacity 0.2s; display: inline-flex; align-items: center; gap: 6px; }
   .btn-green:hover { opacity: 0.88; }
-  .btn-ghost {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 16px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .btn-ghost:hover { background: var(--mid); }
-  .btn-danger {
-    background: transparent;
-    color: var(--red);
-    border: 1px solid rgba(255,77,109,0.3);
-    border-radius: 6px;
-    padding: 5px 12px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .btn-danger:hover { background: rgba(255,77,109,0.1); }
-  .btn-sm {
-    background: var(--mid);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 5px 12px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .btn-sm:hover { background: rgba(0,223,163,0.1); color: var(--green); }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+  .btn-ghost:hover { background: var(--bg); }
+  .btn-danger { background: transparent; color: var(--red); border: 1px solid rgba(239,68,68,0.3); border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  .btn-danger:hover { background: var(--red-light); }
+  .btn-sm { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  .btn-sm:hover { background: var(--green-light); color: var(--dark); border-color: rgba(0,223,163,0.4); }
 
-  /* ── CARDS / PANELS ── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-  }
-  .card-title {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    font-size: 14px;
-    color: var(--white);
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  /* CARDS */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .card-title { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 14px; color: var(--dark); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 
-  /* ── SEARCH BAR ── */
-  .search-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .search-input {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 9px 14px;
-    color: var(--white);
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
+  /* SEARCH */
+  .search-row { display: flex; gap: 10px; margin-bottom: 20px; }
+  .search-input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 9px 14px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; outline: none; transition: border-color 0.2s; }
   .search-input:focus { border-color: var(--green); }
   .search-input::placeholder { color: var(--muted); }
 
-  /* ── TABLE ── */
+  /* TABLE */
   .table-wrap { overflow-x: auto; }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  th {
-    text-align: left;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-  }
-  td {
-    padding: 12px 14px;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-    vertical-align: middle;
-  }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(255,255,255,0.02); }
+  tr:hover td { background: var(--bg); }
 
-  /* ── LOCATION BADGE ── */
-  .loc-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: rgba(0,223,163,0.1);
-    color: var(--green);
-    border: 1px solid rgba(0,223,163,0.25);
-    border-radius: 5px;
-    padding: 3px 9px;
-    font-size: 12px;
-    font-weight: 600;
-    font-family: 'Poppins', sans-serif;
-    letter-spacing: 0.5px;
-  }
-  .loc-empty {
-    display: inline-flex;
-    align-items: center;
-    background: var(--mid);
-    color: var(--muted);
-    border: 1px dashed var(--border);
-    border-radius: 5px;
-    padding: 3px 9px;
-    font-size: 12px;
-  }
+  /* BADGES */
+  .loc-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--green-light); color: #0a8a63; border: 1px solid rgba(0,223,163,0.3); border-radius: 5px; padding: 3px 9px; font-size: 12px; font-weight: 600; font-family: 'Poppins', sans-serif; }
+  .loc-empty { display: inline-flex; align-items: center; background: var(--bg); color: var(--muted); border: 1px dashed var(--border); border-radius: 5px; padding: 3px 9px; font-size: 12px; }
+  .sup-badge { display: inline-block; background: var(--surface2); color: var(--text); border-radius: 4px; padding: 2px 8px; font-size: 11px; border: 1px solid var(--border); }
 
-  /* ── RACK GRID ── */
-  .rack-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 16px;
-  }
-  .rack-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-  .rack-header {
-    background: var(--mid);
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .rack-name {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 15px;
-    color: var(--white);
-  }
-  .rack-count {
-    font-size: 11px;
-    color: var(--muted);
-    background: var(--dark);
-    border-radius: 20px;
-    padding: 2px 10px;
-  }
-  .rack-slots {
-    padding: 12px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 8px;
-  }
-  .slot {
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    padding: 9px 10px;
-    cursor: pointer;
-    transition: all 0.15s;
-    position: relative;
-  }
-  .slot:hover { border-color: var(--green); background: rgba(0,223,163,0.05); }
-  .slot-code {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 12px;
-    color: var(--green);
-    margin-bottom: 3px;
-  }
-  .slot-item {
-    font-size: 11px;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-  }
-  .slot-empty-label {
-    font-size: 11px;
-    color: var(--muted);
-    font-style: italic;
-  }
-  .slot.occupied { border-color: rgba(0,223,163,0.3); background: rgba(0,223,163,0.05); }
+  /* RACK GRID */
+  .rack-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .rack-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .rack-header { background: var(--dark); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .rack-name { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; color: #fff; }
+  .rack-count { font-size: 11px; color: #aaa; background: rgba(255,255,255,0.1); border-radius: 20px; padding: 2px 10px; }
+  .rack-slots { padding: 12px; display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
+  .slot { border: 1px solid var(--border); border-radius: 7px; padding: 9px 10px; cursor: pointer; transition: all 0.15s; background: var(--bg); }
+  .slot:hover { border-color: var(--green); background: var(--green-light); }
+  .slot-code { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 12px; color: var(--dark); margin-bottom: 3px; }
+  .slot-item { font-size: 11px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .slot-empty-label { font-size: 11px; color: var(--muted); font-style: italic; }
+  .slot.occupied { border-color: rgba(0,223,163,0.4); background: var(--green-light); }
+  .slot.occupied .slot-code { color: #0a8a63; }
 
-  /* ── MODAL ── */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 500;
-    align-items: center;
-    justify-content: center;
-  }
+  /* STATS */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+  .stat-value { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 26px; color: var(--dark); }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .stat-accent { color: #0a8a63; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 500; align-items: center; justify-content: center; }
   .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 28px;
-    width: 480px;
-    max-width: 95vw;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-  .modal-title {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 17px;
-    color: var(--white);
-    margin-bottom: 20px;
-  }
-  .modal-footer {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    margin-top: 24px;
-  }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; width: 560px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+  .modal-title { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 17px; color: var(--dark); margin-bottom: 20px; }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
   .field-row { margin-bottom: 14px; }
 
-  /* ── STATS ROW ── */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 14px;
-    margin-bottom: 24px;
-  }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px 18px;
-  }
-  .stat-value {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 26px;
-    color: var(--white);
-  }
-  .stat-label {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 2px;
-  }
-  .stat-accent { color: var(--green); }
-
-  /* ── TOAST ── */
-  #toast {
-    position: fixed;
-    bottom: 28px;
-    right: 28px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--green);
-    border-radius: 8px;
-    padding: 12px 18px;
-    font-size: 13px;
-    color: var(--white);
-    z-index: 9999;
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all 0.3s;
-    pointer-events: none;
-  }
-  #toast.show { transform: translateY(0); opacity: 1; }
-
-  /* ── TABS ── */
-  .tab-row {
-    display: flex;
-    gap: 4px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 24px;
-  }
-  .tab {
-    padding: 9px 18px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--muted);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    transition: all 0.15s;
-  }
+  /* TABS */
+  .tab-row { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .tab { padding: 9px 18px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
   .tab:hover { color: var(--text); }
-  .tab.active { color: var(--green); border-bottom-color: var(--green); }
+  .tab.active { color: var(--dark); border-bottom-color: var(--green); font-weight: 600; }
 
-  /* ── EMPTY STATE ── */
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--muted);
-  }
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
   .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
   .empty-state p { font-size: 14px; }
 
-  /* ── SUPPLIER BADGE ── */
-  .sup-badge {
-    display: inline-block;
-    background: var(--mid);
-    color: var(--text);
-    border-radius: 4px;
-    padding: 2px 8px;
-    font-size: 11px;
-  }
+  /* TOAST */
+  #toast { position: fixed; bottom: 28px; right: 28px; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 8px; padding: 12px 18px; font-size: 13px; color: var(--text); z-index: 9999; transform: translateY(80px); opacity: 0; transition: all 0.3s; pointer-events: none; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  #toast.show { transform: translateY(0); opacity: 1; }
 
-  select.field-input { appearance: none; cursor: pointer; }
+  select.field-input { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
 
-  .tag-admin {
-    background: rgba(249,200,70,0.15);
-    color: var(--yellow);
-    border: 1px solid rgba(249,200,70,0.3);
-    border-radius: 4px;
-    padding: 2px 8px;
-    font-size: 11px;
-    font-weight: 600;
-  }
+  /* RACK VISUAL */
+  .rek-visual { margin-top: 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .rek-visual-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .rek-svg-wrap { overflow-x: auto; }
+
+  /* PROGRESS BAR */
+  .progress-bar-bg { background: var(--bg); border-radius: 4px; height: 8px; overflow: hidden; }
+  .progress-bar-fill { background: var(--green); height: 100%; border-radius: 4px; transition: width 0.4s; }
 </style>
 </head>
 <body>
@@ -578,7 +168,7 @@
     <div class="field-label">E-mailadres</div>
     <input id="login-email" type="email" class="field-input" placeholder="sales@blitzpower.com">
     <div class="field-label">Wachtwoord</div>
-    <input id="login-pw" type="password" class="field-input" placeholder="••••••••">
+    <input id="login-pw" type="password" class="field-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="btn-primary" onclick="doLogin()">Inloggen</button>
     <div id="login-error" class="login-error">Ongeldig e-mailadres of wachtwoord.</div>
   </div>
@@ -587,152 +177,92 @@
 <!-- APP -->
 <div id="app">
   <div class="topbar">
-    <div class="logo">
-      <div class="logo-dot"></div>
-      Blitz <span>WMS</span>
-    </div>
+    <div class="logo"><div class="logo-dot"></div>Blitz <span>WMS</span></div>
     <div class="topbar-right">
       <div class="user-badge" id="user-badge">—</div>
       <button class="btn-logout" onclick="doLogout()">Uitloggen</button>
     </div>
   </div>
-
   <div class="layout">
-    <!-- SIDEBAR -->
     <div class="sidebar">
-      <div class="nav-item active" onclick="setPage('dashboard')" id="nav-dashboard">
-        <span class="nav-icon">📊</span> Dashboard
-      </div>
-      <div class="nav-item" onclick="setPage('locaties')" id="nav-locaties">
-        <span class="nav-icon">📍</span> Locaties
-      </div>
-      <div class="nav-item" onclick="setPage('artikelen')" id="nav-artikelen">
-        <span class="nav-icon">📦</span> Artikelen
-      </div>
-      <div class="nav-item" onclick="setPage('zoeken')" id="nav-zoeken">
-        <span class="nav-icon">🔍</span> Zoeken
-      </div>
+      <div class="nav-item active" onclick="setPage('dashboard')" id="nav-dashboard"><span class="nav-icon">📊</span> Dashboard</div>
+      <div class="nav-item" onclick="setPage('locaties')" id="nav-locaties"><span class="nav-icon">📍</span> Locaties</div>
+      <div class="nav-item" onclick="setPage('artikelen')" id="nav-artikelen"><span class="nav-icon">📦</span> Artikelen</div>
+      <div class="nav-item" onclick="setPage('zoeken')" id="nav-zoeken"><span class="nav-icon">🔍</span> Zoeken</div>
       <div id="nav-admin-section" style="display:none">
         <div class="sidebar-section">Beheer</div>
-        <div class="nav-item" onclick="setPage('rekken')" id="nav-rekken">
-          <span class="nav-icon">🗄️</span> Rekken & Vakken
-        </div>
-        <div class="nav-item" onclick="setPage('leveranciers')" id="nav-leveranciers">
-          <span class="nav-icon">🏭</span> Leveranciers
-        </div>
+        <div class="nav-item" onclick="setPage('rekken')" id="nav-rekken"><span class="nav-icon">🗄️</span> Rekken & Vakken</div>
+        <div class="nav-item" onclick="setPage('leveranciers')" id="nav-leveranciers"><span class="nav-icon">🏭</span> Leveranciers</div>
       </div>
     </div>
-
-    <!-- CONTENT -->
     <div class="content">
 
       <!-- DASHBOARD -->
       <div id="page-dashboard">
         <div class="page-header">
-          <div>
-            <div class="page-title">Dashboard</div>
-            <div class="page-sub">Overzicht van het magazijn</div>
-          </div>
+          <div><div class="page-title">Dashboard</div><div class="page-sub">Overzicht magazijn</div></div>
         </div>
         <div class="stats-row" id="stats-row"></div>
         <div class="card">
-          <div class="card-title">📦 Bezetting per Rek</div>
+          <div class="card-title">🗄️ Bezetting per rek</div>
           <div id="dashboard-rekken"></div>
         </div>
       </div>
 
-      <!-- LOCATIES (Rack view) -->
+      <!-- LOCATIES -->
       <div id="page-locaties" style="display:none">
         <div class="page-header">
-          <div>
-            <div class="page-title">Locaties</div>
-            <div class="page-sub">Klik op een vak om een artikel te koppelen</div>
-          </div>
-          <div style="display:flex;gap:8px">
-            <input class="search-input" style="width:200px" id="loc-search" placeholder="Filter op rek of code..." oninput="renderLocaties()">
-          </div>
+          <div><div class="page-title">Locaties</div><div class="page-sub">Klik op een vak om een artikel te koppelen</div></div>
+          <input class="search-input" style="width:220px" id="loc-search" placeholder="Filter op rek of code..." oninput="renderLocaties()">
         </div>
         <div class="rack-grid" id="rack-grid"></div>
-        <div id="loc-empty" class="empty-state" style="display:none">
-          <div class="icon">🗄️</div>
-          <p>Nog geen rekken aangemaakt.<br>Ga naar <strong>Rekken & Vakken</strong> om te beginnen.</p>
-        </div>
+        <div id="loc-empty" class="empty-state" style="display:none"><div class="icon">🗄️</div><p>Nog geen rekken. Ga naar <strong>Rekken & Vakken</strong>.</p></div>
       </div>
 
       <!-- ARTIKELEN -->
       <div id="page-artikelen" style="display:none">
         <div class="page-header">
-          <div>
-            <div class="page-title">Artikelen</div>
-            <div class="page-sub">Alle artikelen en hun locaties</div>
-          </div>
+          <div><div class="page-title">Artikelen</div><div class="page-sub">Alle artikelen en hun locaties</div></div>
           <button class="btn-green" onclick="openArtikelModal()">+ Nieuw artikel</button>
         </div>
         <div class="search-row">
           <input class="search-input" id="art-search" placeholder="Zoek op naam, SKU of leverancier..." oninput="renderArtikelen()">
-          <select class="field-input" style="width:180px" id="art-filter-loc" onchange="renderArtikelen()">
+          <select class="field-input" style="width:200px;margin-bottom:0" id="art-filter-loc" onchange="renderArtikelen()">
             <option value="">Alle locaties</option>
           </select>
         </div>
         <div class="card">
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>SKU</th>
-                  <th>Naam</th>
-                  <th>Omschrijving</th>
-                  <th>Leverancier</th>
-                  <th>Locatie</th>
-                  <th>Notitie</th>
-                  <th></th>
-                </tr>
-              </thead>
+              <thead><tr><th>SKU</th><th>Naam</th><th>Omschrijving</th><th>Leverancier</th><th>Locatie</th><th>Notitie</th><th></th></tr></thead>
               <tbody id="artikelen-tbody"></tbody>
             </table>
           </div>
-          <div id="artikelen-empty" class="empty-state" style="display:none">
-            <div class="icon">📦</div>
-            <p>Nog geen artikelen gevonden.</p>
-          </div>
+          <div id="artikelen-empty" class="empty-state" style="display:none"><div class="icon">📦</div><p>Geen artikelen gevonden.</p></div>
         </div>
       </div>
 
       <!-- ZOEKEN -->
       <div id="page-zoeken" style="display:none">
-        <div class="page-header">
-          <div>
-            <div class="page-title">Zoeken</div>
-            <div class="page-sub">Vind snel een artikel of locatie</div>
-          </div>
-        </div>
-        <input class="search-input" id="global-search" style="width:100%;max-width:500px;font-size:15px;padding:12px 16px;margin-bottom:24px" placeholder="Zoek op naam, SKU, locatie, leverancier..." oninput="renderZoeken()">
+        <div class="page-header"><div><div class="page-title">Zoeken</div><div class="page-sub">Vind snel een artikel of locatie</div></div></div>
+        <input class="search-input" id="global-search" style="width:100%;max-width:520px;font-size:15px;padding:12px 16px;margin-bottom:24px" placeholder="Zoek op naam, SKU, locatie, leverancier..." oninput="renderZoeken()">
         <div id="zoeken-results"></div>
       </div>
 
-      <!-- REKKEN BEHEER (admin) -->
+      <!-- REKKEN BEHEER -->
       <div id="page-rekken" style="display:none">
         <div class="page-header">
-          <div>
-            <div class="page-title">Rekken & Vakken</div>
-            <div class="page-sub">Beheer de magazijnstructuur</div>
-          </div>
+          <div><div class="page-title">Rekken & Vakken</div><div class="page-sub">Beheer de magazijnstructuur</div></div>
           <button class="btn-green" onclick="openRekModal()">+ Nieuw rek</button>
         </div>
         <div class="rack-grid" id="admin-rack-grid"></div>
-        <div id="rekken-empty" class="empty-state" style="display:none">
-          <div class="icon">🗄️</div>
-          <p>Nog geen rekken. Maak het eerste rek aan.</p>
-        </div>
+        <div id="rekken-empty" class="empty-state" style="display:none"><div class="icon">🗄️</div><p>Nog geen rekken. Maak het eerste rek aan.</p></div>
       </div>
 
-      <!-- LEVERANCIERS (admin) -->
+      <!-- LEVERANCIERS -->
       <div id="page-leveranciers" style="display:none">
         <div class="page-header">
-          <div>
-            <div class="page-title">Leveranciers</div>
-            <div class="page-sub">Beheer leveranciers voor artikelen</div>
-          </div>
+          <div><div class="page-title">Leveranciers</div><div class="page-sub">Beheer leveranciers voor artikelen</div></div>
           <button class="btn-green" onclick="openLevModal()">+ Nieuwe leverancier</button>
         </div>
         <div class="card">
@@ -742,28 +272,23 @@
               <tbody id="lev-tbody"></tbody>
             </table>
           </div>
-          <div id="lev-empty" class="empty-state" style="display:none">
-            <div class="icon">🏭</div>
-            <p>Nog geen leveranciers aangemaakt.</p>
-          </div>
+          <div id="lev-empty" class="empty-state" style="display:none"><div class="icon">🏭</div><p>Nog geen leveranciers.</p></div>
         </div>
       </div>
 
-    </div><!-- /content -->
-  </div><!-- /layout -->
-</div><!-- /app -->
+    </div>
+  </div>
+</div>
 
-<!-- ── MODALS ── -->
+<!-- MODALS -->
 
-<!-- Slot artikel koppelen -->
+<!-- Slot koppelen -->
 <div class="modal-overlay" id="slot-modal">
   <div class="modal">
     <div class="modal-title" id="slot-modal-title">Vak instellen</div>
     <div class="field-row">
       <div class="field-label">Artikel</div>
-      <select id="slot-artikel-select" class="field-input">
-        <option value="">(leeg — geen artikel)</option>
-      </select>
+      <select id="slot-artikel-select" class="field-input"><option value="">(leeg — geen artikel)</option></select>
     </div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal('slot-modal')">Annuleren</button>
@@ -772,38 +297,47 @@
   </div>
 </div>
 
-<!-- Nieuw/bewerk artikel -->
+<!-- Artikel modal -->
 <div class="modal-overlay" id="artikel-modal">
-  <div class="modal">
+  <div class="modal" style="width:640px">
     <div class="modal-title" id="artikel-modal-title">Artikel</div>
     <input type="hidden" id="artikel-id">
-    <div class="field-row">
-      <div class="field-label">SKU / Artikelnummer</div>
-      <input class="field-input" id="art-sku" placeholder="bijv. BP-CHG-001">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="field-row">
+        <div class="field-label">SKU / Artikelnummer</div>
+        <input class="field-input" id="art-sku" placeholder="bijv. BP-CHG-001">
+      </div>
+      <div class="field-row">
+        <div class="field-label">Naam *</div>
+        <input class="field-input" id="art-naam" placeholder="Artikelnaam">
+      </div>
+      <div class="field-row" style="grid-column:1/-1">
+        <div class="field-label">Omschrijving</div>
+        <input class="field-input" id="art-omschrijving" placeholder="Korte omschrijving">
+      </div>
+      <div class="field-row">
+        <div class="field-label">Leverancier</div>
+        <select id="art-leverancier" class="field-input"><option value="">— geen —</option></select>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Notitie</div>
+        <input class="field-input" id="art-notitie" placeholder="Optionele opmerking">
+      </div>
+    </div>
+    <div class="field-row" style="margin-top:4px">
+      <div class="field-label">Rek</div>
+      <select id="art-rek-select" class="field-input" onchange="onRekSelect()"><option value="">— kies rek —</option></select>
     </div>
     <div class="field-row">
-      <div class="field-label">Naam *</div>
-      <input class="field-input" id="art-naam" placeholder="Artikelnaam">
+      <div class="field-label">Vak / Locatie</div>
+      <select id="art-locatie" class="field-input" onchange="updateRekVisueel()"><option value="">— nog niet toegewezen —</option></select>
     </div>
-    <div class="field-row">
-      <div class="field-label">Omschrijving</div>
-      <input class="field-input" id="art-omschrijving" placeholder="Korte omschrijving">
-    </div>
-    <div class="field-row">
-      <div class="field-label">Leverancier</div>
-      <select id="art-leverancier" class="field-input">
-        <option value="">— geen —</option>
-      </select>
-    </div>
-    <div class="field-row">
-      <div class="field-label">Locatie</div>
-      <select id="art-locatie" class="field-input">
-        <option value="">— nog niet toegewezen —</option>
-      </select>
-    </div>
-    <div class="field-row">
-      <div class="field-label">Notitie</div>
-      <input class="field-input" id="art-notitie" placeholder="Optionele opmerking">
+    <!-- VISUELE REK WEERGAVE -->
+    <div id="rek-visueel-wrap" style="display:none">
+      <div class="rek-visual">
+        <div class="rek-visual-title">📍 Locatie in rek</div>
+        <div class="rek-svg-wrap"><svg id="rek-visueel-svg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal('artikel-modal')">Annuleren</button>
@@ -812,23 +346,33 @@
   </div>
 </div>
 
-<!-- Nieuw rek -->
+<!-- Rek modal -->
 <div class="modal-overlay" id="rek-modal">
-  <div class="modal">
+  <div class="modal" style="width:600px">
     <div class="modal-title">Nieuw rek aanmaken</div>
-    <div class="field-row">
-      <div class="field-label">Reknaam (bijv. A, B, C of Rek-01)</div>
-      <input class="field-input" id="rek-naam" placeholder="A">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div class="field-row">
+        <div class="field-label">Reknaam (bijv. A, B)</div>
+        <input class="field-input" id="rek-naam" placeholder="A" oninput="updateRekModalVisueel()">
+      </div>
+      <div class="field-row">
+        <div class="field-label">Aantal lagen</div>
+        <input class="field-input" type="number" id="rek-lagen" min="1" max="10" value="3" oninput="updateRekModalVisueel()">
+      </div>
+      <div class="field-row">
+        <div class="field-label">Plaatsen per laag</div>
+        <input class="field-input" type="number" id="rek-per-laag" min="1" max="20" value="4" oninput="updateRekModalVisueel()">
+      </div>
     </div>
     <div class="field-row">
-      <div class="field-label">Aantal vakken</div>
-      <input class="field-input" type="number" id="rek-vakken" min="1" max="50" value="5" placeholder="5">
+      <div class="field-label">Nummering start bij</div>
+      <input class="field-input" type="number" id="rek-start" min="0" value="1" style="width:120px" oninput="updateRekModalVisueel()">
     </div>
-    <div class="field-row">
-      <div class="field-label">Startnummer vakken (bijv. 01)</div>
-      <input class="field-input" type="number" id="rek-start" min="0" value="1">
+    <!-- VISUELE PREVIEW -->
+    <div class="rek-visual">
+      <div class="rek-visual-title">Voorvertoning rek</div>
+      <div class="rek-svg-wrap"><svg id="rek-modal-svg" xmlns="http://www.w3.org/2000/svg"></svg></div>
     </div>
-    <div id="rek-preview" style="margin-top:8px;color:var(--muted);font-size:12px"></div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal('rek-modal')">Annuleren</button>
       <button class="btn-green" onclick="saveRek()">Aanmaken</button>
@@ -836,7 +380,7 @@
   </div>
 </div>
 
-<!-- Vak toevoegen aan rek -->
+<!-- Vakken toevoegen -->
 <div class="modal-overlay" id="vak-modal">
   <div class="modal">
     <div class="modal-title" id="vak-modal-title">Vakken toevoegen</div>
@@ -852,27 +396,15 @@
   </div>
 </div>
 
-<!-- Leverancier -->
+<!-- Leverancier modal -->
 <div class="modal-overlay" id="lev-modal">
   <div class="modal">
     <div class="modal-title" id="lev-modal-title">Leverancier</div>
     <input type="hidden" id="lev-id">
-    <div class="field-row">
-      <div class="field-label">Naam *</div>
-      <input class="field-input" id="lev-naam" placeholder="Bedrijfsnaam">
-    </div>
-    <div class="field-row">
-      <div class="field-label">Contactpersoon</div>
-      <input class="field-input" id="lev-contact" placeholder="Voornaam Achternaam">
-    </div>
-    <div class="field-row">
-      <div class="field-label">E-mail</div>
-      <input class="field-input" id="lev-email" placeholder="info@leverancier.be">
-    </div>
-    <div class="field-row">
-      <div class="field-label">Telefoon</div>
-      <input class="field-input" id="lev-tel" placeholder="+32 ...">
-    </div>
+    <div class="field-row"><div class="field-label">Naam *</div><input class="field-input" id="lev-naam" placeholder="Bedrijfsnaam"></div>
+    <div class="field-row"><div class="field-label">Contactpersoon</div><input class="field-input" id="lev-contact" placeholder="Voornaam Achternaam"></div>
+    <div class="field-row"><div class="field-label">E-mail</div><input class="field-input" id="lev-email" placeholder="info@leverancier.be"></div>
+    <div class="field-row"><div class="field-label">Telefoon</div><input class="field-input" id="lev-tel" placeholder="+32 ..."></div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal('lev-modal')">Annuleren</button>
       <button class="btn-green" onclick="saveLeverancier()">Opslaan</button>
@@ -880,30 +412,21 @@
   </div>
 </div>
 
-<!-- TOAST -->
 <div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ── SUPABASE INIT ──
 const SUPABASE_URL = 'https://rhztaqutznafsgprnkvn.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJoenRhcXV0em5hZnNncHJua3ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2OTI2MjYsImV4cCI6MjA5NzI2ODYyNn0.n-ojVvnlm8x-g-O6WNoN8un67oR-yHMSlaJVuh_8caI';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ── STATE ──
-let currentUser = null;
-let isAdmin = false;
-let rekken = [];       // { id, naam, slots: [{id, code, artikel_id}] }
-let artikelen = [];    // { id, sku, naam, omschrijving, leverancier_id, locatie_slot_id, notitie }
-let leveranciers = []; // { id, naam, contact, email, tel }
+let currentUser = null, isAdmin = false;
+let rekken = [], artikelen = [], leveranciers = [];
 let currentSlotId = null;
 
-// ── AUTH ──
 sb.auth.onAuthStateChange((event, session) => {
-  if (session && session.user) {
-    currentUser = session.user;
-    initApp();
-  } else if (event === 'SIGNED_OUT') {
+  if (session && session.user) { currentUser = session.user; initApp(); }
+  else if (event === 'SIGNED_OUT') {
     currentUser = null;
     document.getElementById('app').style.display = 'none';
     document.getElementById('login-screen').style.display = 'flex';
@@ -915,66 +438,45 @@ async function doLogin() {
   const pw = document.getElementById('login-pw').value;
   document.getElementById('login-error').style.display = 'none';
   const { error } = await sb.auth.signInWithPassword({ email, password: pw });
-  if (error) { document.getElementById('login-error').style.display = 'block'; }
+  if (error) document.getElementById('login-error').style.display = 'block';
 }
-
-async function doLogout() {
-  await sb.auth.signOut();
-}
+async function doLogout() { await sb.auth.signOut(); }
 
 async function initApp() {
-  // check admin role
   const { data: prof } = await sb.from('wms_users').select('role').eq('user_id', currentUser.id).single();
   isAdmin = prof && prof.role === 'admin';
-
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('user-badge').textContent = currentUser.email;
-
-  if (isAdmin) {
-    document.getElementById('nav-admin-section').style.display = 'block';
-  }
-
+  if (isAdmin) document.getElementById('nav-admin-section').style.display = 'block';
   await loadAll();
   setPage('dashboard');
 }
 
-// ── LOAD DATA ──
 async function loadAll() {
   await Promise.all([loadRekken(), loadArtikelen(), loadLeveranciers()]);
 }
-
 async function loadRekken() {
   const { data: rData } = await sb.from('wms_rekken').select('*').order('naam');
   const { data: sData } = await sb.from('wms_slots').select('*').order('code');
-  rekken = (rData || []).map(r => ({
-    ...r,
-    slots: (sData || []).filter(s => s.rek_id === r.id)
-  }));
+  rekken = (rData || []).map(r => ({ ...r, slots: (sData || []).filter(s => s.rek_id === r.id) }));
 }
-
 async function loadArtikelen() {
   const { data } = await sb.from('wms_artikelen').select('*').order('naam');
   artikelen = data || [];
 }
-
 async function loadLeveranciers() {
   const { data } = await sb.from('wms_leveranciers').select('*').order('naam');
   leveranciers = data || [];
 }
 
-// ── NAVIGATION ──
-let currentPage = 'dashboard';
 function setPage(page) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('[id^="page-"]').forEach(p => p.style.display = 'none');
-
   const nav = document.getElementById('nav-' + page);
   if (nav) nav.classList.add('active');
   const pg = document.getElementById('page-' + page);
   if (pg) pg.style.display = 'block';
-  currentPage = page;
-
   if (page === 'dashboard') renderDashboard();
   if (page === 'locaties') renderLocaties();
   if (page === 'artikelen') renderArtikelen();
@@ -983,154 +485,180 @@ function setPage(page) {
   if (page === 'leveranciers') renderLeveranciers();
 }
 
-// ── DASHBOARD ──
-function renderDashboard() {
-  const totSlots = rekken.reduce((a, r) => a + r.slots.length, 0);
-  const bezet = rekken.reduce((a, r) => a + r.slots.filter(s => s.artikel_id).length, 0);
-  const vrij = totSlots - bezet;
-  const pct = totSlots ? Math.round(bezet / totSlots * 100) : 0;
+// ── RACK SVG VISUAL ──
+// Generates an SVG of a rack: lagen (rows from top=highest) x perLaag (columns)
+// highlightCode: slot code to highlight in green
+function buildRekSVG(naam, slots, highlightCode) {
+  // Parse slots to find grid dimensions
+  // slots have codes like "A-01", "A-02", etc. — sequential numbers
+  // We'll use lagen & perLaag from the rek metadata stored in wms_rekken
+  // Fallback: detect from slot count
+  const rek = rekken.find(r => r.naam === naam);
+  const lagen = (rek && rek.lagen) ? rek.lagen : Math.ceil(Math.sqrt(slots.length));
+  const perLaag = (rek && rek.per_laag) ? rek.per_laag : Math.ceil(slots.length / lagen);
 
-  document.getElementById('stats-row').innerHTML =
-    statCard(rekken.length, 'Rekken') +
-    statCard(totSlots, 'Vakken totaal') +
-    '<div class="stat-card"><div class="stat-value stat-accent">' + bezet + '</div><div class="stat-label">Bezette vakken</div></div>' +
-    statCard(vrij, 'Vrije vakken') +
-    statCard(artikelen.length, 'Artikelen') +
-    statCard(leveranciers.length, 'Leveranciers');
+  const cellW = 64, cellH = 42, pad = 8, labelW = 36;
+  const totalW = labelW + perLaag * (cellW + pad) + pad;
+  const totalH = lagen * (cellH + pad) + pad + 28;
 
-  const container = document.getElementById('dashboard-rekken');
-  if (!rekken.length) { container.innerHTML = '<div class="empty-state"><div class="icon">🗄️</div><p>Nog geen rekken aangemaakt.</p></div>'; return; }
+  let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + totalW + '" height="' + totalH + '" viewBox="0 0 ' + totalW + ' ' + totalH + '" style="display:block">';
 
-  container.innerHTML = rekken.map(r => {
-    const b = r.slots.filter(s => s.artikel_id).length;
-    const t = r.slots.length;
-    const p = t ? Math.round(b / t * 100) : 0;
-    return '<div style="margin-bottom:14px">' +
-      '<div style="display:flex;justify-content:space-between;margin-bottom:5px">' +
-      '<span style="font-weight:600;color:var(--white)">Rek ' + r.naam + '</span>' +
-      '<span style="color:var(--muted);font-size:12px">' + b + ' / ' + t + ' vakken (' + p + '%)</span></div>' +
-      '<div style="background:var(--mid);border-radius:4px;height:8px">' +
-      '<div style="background:var(--green);height:100%;border-radius:4px;width:' + p + '%"></div></div></div>';
-  }).join('');
-}
+  // Background
+  svg += '<rect width="' + totalW + '" height="' + totalH + '" fill="#F5F6F8" rx="6"/>';
 
-function statCard(val, label) {
-  return '<div class="stat-card"><div class="stat-value">' + val + '</div><div class="stat-label">' + label + '</div></div>';
-}
-
-// ── LOCATIES ──
-function renderLocaties() {
-  const q = (document.getElementById('loc-search').value || '').toLowerCase();
-  const grid = document.getElementById('rack-grid');
-  const emptyEl = document.getElementById('loc-empty');
-
-  const filtered = rekken.filter(r =>
-    !q || r.naam.toLowerCase().includes(q) ||
-    r.slots.some(s => s.code.toLowerCase().includes(q))
-  );
-
-  if (!filtered.length) {
-    grid.innerHTML = '';
-    emptyEl.style.display = 'block';
-    return;
-  }
-  emptyEl.style.display = 'none';
-
-  grid.innerHTML = filtered.map(r => {
-    const slots = r.slots.map(s => {
-      const art = artikelen.find(a => a.id === s.artikel_id);
-      return '<div class="slot ' + (art ? 'occupied' : '') + '" onclick="openSlotModal(\'' + s.id + '\')" title="' + s.code + '">' +
-        '<div class="slot-code">' + s.code + '</div>' +
-        (art
-          ? '<div class="slot-item">' + (art.sku ? '<span style="color:var(--muted);margin-right:3px">' + art.sku + '</span>' : '') + art.naam + '</div>'
-          : '<div class="slot-empty-label">leeg</div>') +
-        '</div>';
-    }).join('');
-    const bezet = r.slots.filter(s => s.artikel_id).length;
-    return '<div class="rack-card">' +
-      '<div class="rack-header"><div class="rack-name">Rek ' + r.naam + '</div>' +
-      '<div class="rack-count">' + bezet + '/' + r.slots.length + '</div></div>' +
-      '<div class="rack-slots">' + (slots || '<div style="padding:10px;color:var(--muted);font-size:12px">Geen vakken</div>') + '</div></div>';
-  }).join('');
-}
-
-function openSlotModal(slotId) {
-  const slot = rekken.flatMap(r => r.slots).find(s => s.id === slotId);
-  if (!slot) return;
-  currentSlotId = slotId;
-
-  document.getElementById('slot-modal-title').textContent = 'Vak ' + slot.code;
-  const sel = document.getElementById('slot-artikel-select');
-  sel.innerHTML = '<option value="">(leeg — geen artikel)</option>' +
-    artikelen.map(a => '<option value="' + a.id + '" ' + (slot.artikel_id === a.id ? 'selected' : '') + '>' +
-      (a.sku ? '[' + a.sku + '] ' : '') + a.naam + '</option>').join('');
-  openModal('slot-modal');
-}
-
-async function saveSlotArtikel() {
-  const artikelId = document.getElementById('slot-artikel-select').value || null;
-  await sb.from('wms_slots').update({ artikel_id: artikelId }).eq('id', currentSlotId);
-
-  // Also update artikel's locatie_slot_id
-  if (artikelId) {
-    await sb.from('wms_artikelen').update({ locatie_slot_id: currentSlotId }).eq('id', artikelId);
-  }
-  // Clear old artikel that was here
-  const oldArt = artikelen.find(a => a.locatie_slot_id === currentSlotId && (!artikelId || a.id !== artikelId));
-  if (oldArt) {
-    await sb.from('wms_artikelen').update({ locatie_slot_id: null }).eq('id', oldArt.id);
+  // Column headers (position numbers)
+  for (let c = 0; c < perLaag; c++) {
+    const x = labelW + c * (cellW + pad) + pad + cellW / 2;
+    svg += '<text x="' + x + '" y="18" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#6B7280">' + (c + 1) + '</text>';
   }
 
+  // Draw cells row by row (top = highest laag)
+  for (let r = 0; r < lagen; r++) {
+    const layerLabel = lagen - r; // top row = highest layer
+    const y = 28 + r * (cellH + pad) + pad;
+
+    // Row label
+    svg += '<text x="' + (labelW - 6) + '" y="' + (y + cellH / 2 + 4) + '" text-anchor="end" font-family="Inter,sans-serif" font-size="10" fill="#6B7280">L' + layerLabel + '</text>';
+
+    for (let c = 0; c < perLaag; c++) {
+      const slotIndex = r * perLaag + c;
+      const slot = slots[slotIndex];
+      if (!slot) continue;
+
+      const x = labelW + c * (cellW + pad) + pad;
+      const isHighlight = slot.code === highlightCode;
+      const isOccupied = !!slot.artikel_id;
+      const art = isOccupied ? artikelen.find(a => a.id === slot.artikel_id) : null;
+
+      let fillColor = '#FFFFFF';
+      let strokeColor = '#E2E4EA';
+      let textColor = '#6B7280';
+      let codeColor = '#1D252D';
+
+      if (isHighlight) {
+        fillColor = '#00DFA3';
+        strokeColor = '#00a87a';
+        textColor = '#064d38';
+        codeColor = '#064d38';
+      } else if (isOccupied) {
+        fillColor = '#E6FDF7';
+        strokeColor = 'rgba(0,223,163,0.4)';
+        textColor = '#0a8a63';
+        codeColor = '#0a8a63';
+      }
+
+      svg += '<rect x="' + x + '" y="' + y + '" width="' + cellW + '" height="' + cellH + '" rx="5" fill="' + fillColor + '" stroke="' + strokeColor + '" stroke-width="1.5"/>';
+      svg += '<text x="' + (x + cellW/2) + '" y="' + (y + 14) + '" text-anchor="middle" font-family="Poppins,sans-serif" font-size="10" font-weight="700" fill="' + codeColor + '">' + slot.code + '</text>';
+
+      if (art) {
+        const label = (art.naam || '').substring(0, 8) + (art.naam.length > 8 ? '…' : '');
+        svg += '<text x="' + (x + cellW/2) + '" y="' + (y + 27) + '" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="' + textColor + '">' + label + '</text>';
+      } else if (!isHighlight) {
+        svg += '<text x="' + (x + cellW/2) + '" y="' + (y + 27) + '" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#C0C4CE">leeg</text>';
+      }
+
+      // Pin icon for highlight
+      if (isHighlight) {
+        svg += '<text x="' + (x + cellW/2) + '" y="' + (y + cellH - 6) + '" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#064d38">📍</text>';
+      }
+    }
+  }
+
+  svg += '</svg>';
+  return svg;
+}
+
+// Preview SVG in rek-aanmaken modal (no slots yet, just structure)
+function buildPreviewSVG(naam, lagen, perLaag, start) {
+  const cellW = 58, cellH = 38, pad = 7, labelW = 32;
+  const totalW = labelW + perLaag * (cellW + pad) + pad;
+  const totalH = lagen * (cellH + pad) + pad + 26;
+
+  let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + totalW + '" height="' + totalH + '" viewBox="0 0 ' + totalW + ' ' + totalH + '" style="display:block;max-width:100%">';
+  svg += '<rect width="' + totalW + '" height="' + totalH + '" fill="#F5F6F8" rx="6"/>';
+
+  let counter = start;
+  for (let c = 0; c < perLaag; c++) {
+    const x = labelW + c * (cellW + pad) + pad + cellW / 2;
+    svg += '<text x="' + x + '" y="16" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#6B7280">' + (c + 1) + '</text>';
+  }
+
+  for (let r = 0; r < lagen; r++) {
+    const layerLabel = lagen - r;
+    const y = 24 + r * (cellH + pad) + pad;
+    svg += '<text x="' + (labelW - 4) + '" y="' + (y + cellH/2 + 4) + '" text-anchor="end" font-family="Inter,sans-serif" font-size="10" fill="#6B7280">L' + layerLabel + '</text>';
+    for (let c = 0; c < perLaag; c++) {
+      const x = labelW + c * (cellW + pad) + pad;
+      const code = naam + '-' + String(counter).padStart(2, '0');
+      svg += '<rect x="' + x + '" y="' + y + '" width="' + cellW + '" height="' + cellH + '" rx="5" fill="#fff" stroke="#E2E4EA" stroke-width="1.5"/>';
+      svg += '<text x="' + (x + cellW/2) + '" y="' + (y + cellH/2 + 4) + '" text-anchor="middle" font-family="Poppins,sans-serif" font-size="10" font-weight="700" fill="#1D252D">' + code + '</text>';
+      counter++;
+    }
+  }
+  svg += '</svg>';
+  return svg;
+}
+
+function updateRekModalVisueel() {
+  const naam = document.getElementById('rek-naam').value || '?';
+  const lagen = Math.max(1, Math.min(10, parseInt(document.getElementById('rek-lagen').value) || 1));
+  const perLaag = Math.max(1, Math.min(20, parseInt(document.getElementById('rek-per-laag').value) || 1));
+  const start = parseInt(document.getElementById('rek-start').value) || 1;
+  document.getElementById('rek-modal-svg').outerHTML = buildPreviewSVG(naam, lagen, perLaag, start);
+  // Re-select since outerHTML replaces the element
+  const wrap = document.querySelector('.rek-svg-wrap');
+  if (wrap) {
+    const existing = document.getElementById('rek-modal-svg');
+    if (!existing) wrap.innerHTML = buildPreviewSVG(naam, lagen, perLaag, start);
+  }
+}
+
+function openRekModal() {
+  document.getElementById('rek-naam').value = '';
+  document.getElementById('rek-lagen').value = 3;
+  document.getElementById('rek-per-laag').value = 4;
+  document.getElementById('rek-start').value = 1;
+  openModal('rek-modal');
+  setTimeout(() => {
+    const wrap = document.querySelector('#rek-modal .rek-svg-wrap');
+    if (wrap) wrap.innerHTML = buildPreviewSVG('?', 3, 4, 1);
+  }, 50);
+}
+
+// Listen to rek modal inputs
+document.addEventListener('input', function(e) {
+  if (['rek-naam','rek-lagen','rek-per-laag','rek-start'].includes(e.target.id)) {
+    const naam = document.getElementById('rek-naam').value || '?';
+    const lagen = Math.max(1, Math.min(10, parseInt(document.getElementById('rek-lagen').value) || 1));
+    const perLaag = Math.max(1, Math.min(20, parseInt(document.getElementById('rek-per-laag').value) || 1));
+    const start = parseInt(document.getElementById('rek-start').value) || 1;
+    const wrap = document.querySelector('#rek-modal .rek-svg-wrap');
+    if (wrap) wrap.innerHTML = buildPreviewSVG(naam, lagen, perLaag, start);
+  }
+});
+
+async function saveRek() {
+  const naam = document.getElementById('rek-naam').value.trim();
+  const lagen = parseInt(document.getElementById('rek-lagen').value);
+  const perLaag = parseInt(document.getElementById('rek-per-laag').value);
+  const start = parseInt(document.getElementById('rek-start').value);
+  if (!naam) { showToast('Naam is verplicht', true); return; }
+  if (rekken.find(r => r.naam.toLowerCase() === naam.toLowerCase())) { showToast('Rek "' + naam + '" bestaat al', true); return; }
+
+  const totalSlots = lagen * perLaag;
+  const { data: rek } = await sb.from('wms_rekken').insert({ naam, lagen, per_laag: perLaag }).select().single();
+  const slots = [];
+  for (let i = 0; i < totalSlots; i++) {
+    slots.push({ rek_id: rek.id, code: naam + '-' + String(start + i).padStart(2, '0'), artikel_id: null });
+  }
+  await sb.from('wms_slots').insert(slots);
   await loadAll();
-  closeModal('slot-modal');
-  renderLocaties();
-  showToast('Vak opgeslagen ✓');
+  closeModal('rek-modal');
+  renderAdminRekken();
+  showToast('Rek ' + naam + ' aangemaakt (' + lagen + ' lagen × ' + perLaag + ' plaatsen = ' + totalSlots + ' vakken) ✓');
 }
 
-// ── ARTIKELEN ──
-function renderArtikelen() {
-  const q = (document.getElementById('art-search').value || '').toLowerCase();
-  const locFilter = document.getElementById('art-filter-loc').value;
-
-  // populate loc filter
-  const locSel = document.getElementById('art-filter-loc');
-  const currentVal = locSel.value;
-  locSel.innerHTML = '<option value="">Alle locaties</option>' +
-    rekken.flatMap(r => r.slots).filter(s => s.artikel_id).map(s =>
-      '<option value="' + s.id + '">' + s.code + '</option>').join('');
-  locSel.value = currentVal;
-
-  let list = artikelen;
-  if (q) list = list.filter(a =>
-    a.naam.toLowerCase().includes(q) ||
-    (a.sku || '').toLowerCase().includes(q) ||
-    (a.omschrijving || '').toLowerCase().includes(q) ||
-    levNaam(a.leverancier_id).toLowerCase().includes(q)
-  );
-  if (locFilter) list = list.filter(a => a.locatie_slot_id === locFilter);
-
-  const tbody = document.getElementById('artikelen-tbody');
-  const emptyEl = document.getElementById('artikelen-empty');
-
-  if (!list.length) { tbody.innerHTML = ''; emptyEl.style.display = 'block'; return; }
-  emptyEl.style.display = 'none';
-
-  tbody.innerHTML = list.map(a => {
-    const slot = rekken.flatMap(r => r.slots).find(s => s.id === a.locatie_slot_id);
-    return '<tr>' +
-      '<td><span style="font-family:Poppins;font-size:12px;color:var(--muted)">' + (a.sku || '—') + '</span></td>' +
-      '<td style="font-weight:600;color:var(--white)">' + a.naam + '</td>' +
-      '<td style="color:var(--muted)">' + (a.omschrijving || '—') + '</td>' +
-      '<td>' + (a.leverancier_id ? '<span class="sup-badge">' + levNaam(a.leverancier_id) + '</span>' : '<span style="color:var(--muted)">—</span>') + '</td>' +
-      '<td>' + (slot ? '<span class="loc-badge">📍 ' + slot.code + '</span>' : '<span class="loc-empty">niet toegewezen</span>') + '</td>' +
-      '<td style="color:var(--muted);font-size:12px">' + (a.notitie || '') + '</td>' +
-      '<td style="text-align:right;white-space:nowrap">' +
-      '<button class="btn-sm" style="margin-right:6px" onclick="openArtikelModal(\'' + a.id + '\')">Bewerken</button>' +
-      '<button class="btn-danger" onclick="deleteArtikel(\'' + a.id + '\')">Verwijder</button>' +
-      '</td></tr>';
-  }).join('');
-}
-
+// ── ARTIKEL MODAL met rek visualisatie ──
 function openArtikelModal(id) {
   const a = id ? artikelen.find(x => x.id === id) : null;
   document.getElementById('artikel-modal-title').textContent = a ? 'Artikel bewerken' : 'Nieuw artikel';
@@ -1142,40 +670,96 @@ function openArtikelModal(id) {
 
   const levSel = document.getElementById('art-leverancier');
   levSel.innerHTML = '<option value="">— geen —</option>' +
-    leveranciers.map(l => '<option value="' + l.id + '" ' + (a && a.leverancier_id === l.id ? 'selected' : '') + '>' + l.naam + '</option>').join('');
+    leveranciers.map(l => '<option value="' + l.id + '"' + (a && a.leverancier_id === l.id ? ' selected' : '') + '>' + l.naam + '</option>').join('');
 
-  const locSel = document.getElementById('art-locatie');
-  const allSlots = rekken.flatMap(r => r.slots.map(s => ({ ...s, reknaam: r.naam })));
-  locSel.innerHTML = '<option value="">— nog niet toegewezen —</option>' +
-    allSlots.map(s => '<option value="' + s.id + '" ' + (a && a.locatie_slot_id === s.id ? 'selected' : '') + '>' + s.code + '</option>').join('');
+  // Rek selector
+  const rekSel = document.getElementById('art-rek-select');
+  rekSel.innerHTML = '<option value="">— kies rek —</option>' + rekken.map(r => '<option value="' + r.id + '">' + r.naam + '</option>').join('');
+
+  // If artikel has a locatie, preselect the rek
+  document.getElementById('art-locatie').innerHTML = '<option value="">— nog niet toegewezen —</option>';
+  document.getElementById('rek-visueel-wrap').style.display = 'none';
+
+  if (a && a.locatie_slot_id) {
+    const slot = rekken.flatMap(r => r.slots).find(s => s.id === a.locatie_slot_id);
+    if (slot) {
+      const rek = rekken.find(r => r.slots.some(s => s.id === slot.id));
+      if (rek) {
+        rekSel.value = rek.id;
+        populateSlotSelect(rek.id, a.locatie_slot_id);
+        updateRekVisueel();
+      }
+    }
+  }
 
   openModal('artikel-modal');
+}
+
+function onRekSelect() {
+  const rekId = document.getElementById('art-rek-select').value;
+  populateSlotSelect(rekId, null);
+  updateRekVisueel();
+}
+
+function populateSlotSelect(rekId, selectedSlotId) {
+  const locSel = document.getElementById('art-locatie');
+  if (!rekId) {
+    locSel.innerHTML = '<option value="">— nog niet toegewezen —</option>';
+    document.getElementById('rek-visueel-wrap').style.display = 'none';
+    return;
+  }
+  const rek = rekken.find(r => r.id === rekId);
+  if (!rek) return;
+  locSel.innerHTML = '<option value="">— kies vak —</option>' +
+    rek.slots.map(s => {
+      const art = artikelen.find(a => a.id === s.artikel_id);
+      const label = s.code + (art ? ' (bezet: ' + art.naam + ')' : ' (leeg)');
+      return '<option value="' + s.id + '"' + (s.id === selectedSlotId ? ' selected' : '') + '>' + label + '</option>';
+    }).join('');
+}
+
+function updateRekVisueel() {
+  const rekId = document.getElementById('art-rek-select').value;
+  const slotId = document.getElementById('art-locatie').value;
+  const wrap = document.getElementById('rek-visueel-wrap');
+
+  if (!rekId) { wrap.style.display = 'none'; return; }
+
+  const rek = rekken.find(r => r.id === rekId);
+  if (!rek) { wrap.style.display = 'none'; return; }
+
+  wrap.style.display = 'block';
+  const selectedSlot = rek.slots.find(s => s.id === slotId);
+  const highlightCode = selectedSlot ? selectedSlot.code : null;
+  const svgWrap = wrap.querySelector('.rek-svg-wrap');
+  svgWrap.innerHTML = buildRekSVG(rek.naam, rek.slots, highlightCode);
 }
 
 async function saveArtikel() {
   const naam = document.getElementById('art-naam').value.trim();
   if (!naam) { showToast('Naam is verplicht', true); return; }
-
   const id = document.getElementById('artikel-id').value;
+  const slotId = document.getElementById('art-locatie').value || null;
   const payload = {
     sku: document.getElementById('art-sku').value.trim() || null,
     naam,
     omschrijving: document.getElementById('art-omschrijving').value.trim() || null,
     leverancier_id: document.getElementById('art-leverancier').value || null,
-    locatie_slot_id: document.getElementById('art-locatie').value || null,
+    locatie_slot_id: slotId,
     notitie: document.getElementById('art-notitie').value.trim() || null,
   };
 
+  // Clear old slot if changed
   if (id) {
+    const oldArt = artikelen.find(a => a.id === id);
+    if (oldArt && oldArt.locatie_slot_id && oldArt.locatie_slot_id !== slotId) {
+      await sb.from('wms_slots').update({ artikel_id: null }).eq('id', oldArt.locatie_slot_id);
+    }
     await sb.from('wms_artikelen').update(payload).eq('id', id);
+    if (slotId) await sb.from('wms_slots').update({ artikel_id: id }).eq('id', slotId);
   } else {
-    await sb.from('wms_artikelen').insert(payload);
-  }
-
-  // sync slot artikel_id
-  const slotId = payload.locatie_slot_id;
-  if (slotId) {
-    await sb.from('wms_slots').update({ artikel_id: id || undefined }).eq('id', slotId);
+    const { data: newArt } = await sb.from('wms_artikelen').insert(payload).select().single();
+    if (slotId && newArt) await sb.from('wms_slots').update({ artikel_id: newArt.id }).eq('id', slotId);
   }
 
   await loadAll();
@@ -1187,13 +771,104 @@ async function saveArtikel() {
 async function deleteArtikel(id) {
   if (!confirm('Artikel verwijderen?')) return;
   const art = artikelen.find(a => a.id === id);
-  if (art && art.locatie_slot_id) {
-    await sb.from('wms_slots').update({ artikel_id: null }).eq('id', art.locatie_slot_id);
-  }
+  if (art && art.locatie_slot_id) await sb.from('wms_slots').update({ artikel_id: null }).eq('id', art.locatie_slot_id);
   await sb.from('wms_artikelen').delete().eq('id', id);
   await loadAll();
   renderArtikelen();
   showToast('Artikel verwijderd');
+}
+
+// ── DASHBOARD ──
+function renderDashboard() {
+  const totSlots = rekken.reduce((a, r) => a + r.slots.length, 0);
+  const bezet = rekken.reduce((a, r) => a + r.slots.filter(s => s.artikel_id).length, 0);
+  document.getElementById('stats-row').innerHTML =
+    sc(rekken.length, 'Rekken') + sc(totSlots, 'Vakken totaal') +
+    '<div class="stat-card"><div class="stat-value stat-accent">' + bezet + '</div><div class="stat-label">Bezette vakken</div></div>' +
+    sc(totSlots - bezet, 'Vrije vakken') + sc(artikelen.length, 'Artikelen') + sc(leveranciers.length, 'Leveranciers');
+
+  const c = document.getElementById('dashboard-rekken');
+  if (!rekken.length) { c.innerHTML = '<div class="empty-state"><div class="icon">🗄️</div><p>Nog geen rekken aangemaakt.</p></div>'; return; }
+  c.innerHTML = rekken.map(r => {
+    const b = r.slots.filter(s => s.artikel_id).length, t = r.slots.length;
+    const p = t ? Math.round(b / t * 100) : 0;
+    return '<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-weight:600;color:var(--dark)">Rek ' + r.naam + '</span><span style="color:var(--muted);font-size:12px">' + b + ' / ' + t + ' vakken (' + p + '%)</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" style="width:' + p + '%"></div></div></div>';
+  }).join('');
+}
+function sc(v, l) { return '<div class="stat-card"><div class="stat-value">' + v + '</div><div class="stat-label">' + l + '</div></div>'; }
+
+// ── LOCATIES ──
+function renderLocaties() {
+  const q = (document.getElementById('loc-search').value || '').toLowerCase();
+  const grid = document.getElementById('rack-grid');
+  const emptyEl = document.getElementById('loc-empty');
+  const filtered = rekken.filter(r => !q || r.naam.toLowerCase().includes(q) || r.slots.some(s => s.code.toLowerCase().includes(q)));
+  if (!filtered.length) { grid.innerHTML = ''; emptyEl.style.display = 'block'; return; }
+  emptyEl.style.display = 'none';
+  grid.innerHTML = filtered.map(r => {
+    const slots = r.slots.map(s => {
+      const art = artikelen.find(a => a.id === s.artikel_id);
+      return '<div class="slot ' + (art ? 'occupied' : '') + '" onclick="openSlotModal(\'' + s.id + '\')">' +
+        '<div class="slot-code">' + s.code + '</div>' +
+        (art ? '<div class="slot-item">' + (art.sku ? '<span style="color:var(--muted);margin-right:3px">' + art.sku + '</span>' : '') + art.naam + '</div>'
+             : '<div class="slot-empty-label">leeg</div>') + '</div>';
+    }).join('');
+    const bezet = r.slots.filter(s => s.artikel_id).length;
+    return '<div class="rack-card"><div class="rack-header"><div class="rack-name">Rek ' + r.naam + '</div><div class="rack-count">' + bezet + '/' + r.slots.length + '</div></div><div class="rack-slots">' + (slots || '<div style="padding:10px;color:var(--muted);font-size:12px">Geen vakken</div>') + '</div></div>';
+  }).join('');
+}
+
+function openSlotModal(slotId) {
+  const slot = rekken.flatMap(r => r.slots).find(s => s.id === slotId);
+  if (!slot) return;
+  currentSlotId = slotId;
+  document.getElementById('slot-modal-title').textContent = 'Vak ' + slot.code;
+  const sel = document.getElementById('slot-artikel-select');
+  sel.innerHTML = '<option value="">(leeg — geen artikel)</option>' +
+    artikelen.map(a => '<option value="' + a.id + '"' + (slot.artikel_id === a.id ? ' selected' : '') + '>' + (a.sku ? '[' + a.sku + '] ' : '') + a.naam + '</option>').join('');
+  openModal('slot-modal');
+}
+
+async function saveSlotArtikel() {
+  const artikelId = document.getElementById('slot-artikel-select').value || null;
+  // Clear previous artikel from this slot
+  const oldArt = artikelen.find(a => a.locatie_slot_id === currentSlotId);
+  if (oldArt && (!artikelId || oldArt.id !== artikelId)) {
+    await sb.from('wms_artikelen').update({ locatie_slot_id: null }).eq('id', oldArt.id);
+  }
+  await sb.from('wms_slots').update({ artikel_id: artikelId }).eq('id', currentSlotId);
+  if (artikelId) await sb.from('wms_artikelen').update({ locatie_slot_id: currentSlotId }).eq('id', artikelId);
+  await loadAll(); closeModal('slot-modal'); renderLocaties(); showToast('Vak opgeslagen ✓');
+}
+
+// ── ARTIKELEN ──
+function renderArtikelen() {
+  const q = (document.getElementById('art-search').value || '').toLowerCase();
+  const locFilter = document.getElementById('art-filter-loc').value;
+  const locSel = document.getElementById('art-filter-loc');
+  const cv = locSel.value;
+  locSel.innerHTML = '<option value="">Alle locaties</option>' +
+    rekken.flatMap(r => r.slots).filter(s => s.artikel_id).map(s => '<option value="' + s.id + '">' + s.code + '</option>').join('');
+  locSel.value = cv;
+
+  let list = artikelen;
+  if (q) list = list.filter(a => a.naam.toLowerCase().includes(q) || (a.sku||'').toLowerCase().includes(q) || (a.omschrijving||'').toLowerCase().includes(q) || levNaam(a.leverancier_id).toLowerCase().includes(q));
+  if (locFilter) list = list.filter(a => a.locatie_slot_id === locFilter);
+
+  const tbody = document.getElementById('artikelen-tbody');
+  const emptyEl = document.getElementById('artikelen-empty');
+  if (!list.length) { tbody.innerHTML = ''; emptyEl.style.display = 'block'; return; }
+  emptyEl.style.display = 'none';
+  tbody.innerHTML = list.map(a => {
+    const slot = rekken.flatMap(r => r.slots).find(s => s.id === a.locatie_slot_id);
+    return '<tr><td style="color:var(--muted);font-family:Poppins,sans-serif;font-size:12px">' + (a.sku||'—') + '</td>' +
+      '<td style="font-weight:600">' + a.naam + '</td>' +
+      '<td style="color:var(--muted)">' + (a.omschrijving||'—') + '</td>' +
+      '<td>' + (a.leverancier_id ? '<span class="sup-badge">' + levNaam(a.leverancier_id) + '</span>' : '<span style="color:var(--muted)">—</span>') + '</td>' +
+      '<td>' + (slot ? '<span class="loc-badge">📍 ' + slot.code + '</span>' : '<span class="loc-empty">niet toegewezen</span>') + '</td>' +
+      '<td style="color:var(--muted);font-size:12px">' + (a.notitie||'') + '</td>' +
+      '<td style="text-align:right;white-space:nowrap"><button class="btn-sm" style="margin-right:6px" onclick="openArtikelModal(\'' + a.id + '\')">Bewerken</button><button class="btn-danger" onclick="deleteArtikel(\'' + a.id + '\')">Verwijder</button></td></tr>';
+  }).join('');
 }
 
 // ── ZOEKEN ──
@@ -1201,121 +876,35 @@ function renderZoeken() {
   const q = (document.getElementById('global-search').value || '').toLowerCase().trim();
   const container = document.getElementById('zoeken-results');
   if (!q) { container.innerHTML = '<p style="color:var(--muted)">Begin met typen om te zoeken...</p>'; return; }
-
   const allSlots = rekken.flatMap(r => r.slots.map(s => ({ ...s, reknaam: r.naam })));
-
-  // Search artikelen
-  const arts = artikelen.filter(a =>
-    a.naam.toLowerCase().includes(q) ||
-    (a.sku || '').toLowerCase().includes(q) ||
-    (a.omschrijving || '').toLowerCase().includes(q) ||
-    levNaam(a.leverancier_id).toLowerCase().includes(q) ||
-    (a.notitie || '').toLowerCase().includes(q)
-  );
-
-  // Search slots by code
+  const arts = artikelen.filter(a => a.naam.toLowerCase().includes(q) || (a.sku||'').toLowerCase().includes(q) || (a.omschrijving||'').toLowerCase().includes(q) || levNaam(a.leverancier_id).toLowerCase().includes(q) || (a.notitie||'').toLowerCase().includes(q));
   const slots = allSlots.filter(s => s.code.toLowerCase().includes(q));
-
   let html = '';
   if (arts.length) {
     html += '<div class="card" style="margin-bottom:16px"><div class="card-title">📦 Artikelen (' + arts.length + ')</div><div class="table-wrap"><table><thead><tr><th>SKU</th><th>Naam</th><th>Locatie</th><th>Leverancier</th></tr></thead><tbody>' +
-      arts.map(a => {
-        const slot = allSlots.find(s => s.id === a.locatie_slot_id);
-        return '<tr><td style="color:var(--muted)">' + (a.sku || '—') + '</td>' +
-          '<td style="font-weight:600;color:var(--white)">' + a.naam + '</td>' +
-          '<td>' + (slot ? '<span class="loc-badge">📍 ' + slot.code + '</span>' : '<span class="loc-empty">niet toegewezen</span>') + '</td>' +
-          '<td>' + (a.leverancier_id ? '<span class="sup-badge">' + levNaam(a.leverancier_id) + '</span>' : '—') + '</td></tr>';
-      }).join('') + '</tbody></table></div></div>';
+      arts.map(a => { const slot = allSlots.find(s => s.id === a.locatie_slot_id); return '<tr><td style="color:var(--muted)">' + (a.sku||'—') + '</td><td style="font-weight:600">' + a.naam + '</td><td>' + (slot ? '<span class="loc-badge">📍 ' + slot.code + '</span>' : '<span class="loc-empty">niet toegewezen</span>') + '</td><td>' + (a.leverancier_id ? '<span class="sup-badge">' + levNaam(a.leverancier_id) + '</span>' : '—') + '</td></tr>'; }).join('') +
+      '</tbody></table></div></div>';
   }
-
   if (slots.length) {
     html += '<div class="card"><div class="card-title">📍 Locaties (' + slots.length + ')</div><div class="table-wrap"><table><thead><tr><th>Code</th><th>Artikel</th><th>SKU</th></tr></thead><tbody>' +
-      slots.map(s => {
-        const art = artikelen.find(a => a.id === s.artikel_id);
-        return '<tr><td><span class="loc-badge">📍 ' + s.code + '</span></td>' +
-          '<td style="font-weight:600;color:var(--white)">' + (art ? art.naam : '<span style="color:var(--muted);font-style:italic">Leeg</span>') + '</td>' +
-          '<td style="color:var(--muted)">' + (art ? (art.sku || '—') : '') + '</td></tr>';
-      }).join('') + '</tbody></table></div></div>';
+      slots.map(s => { const art = artikelen.find(a => a.id === s.artikel_id); return '<tr><td><span class="loc-badge">📍 ' + s.code + '</span></td><td style="font-weight:600">' + (art ? art.naam : '<span style="color:var(--muted);font-style:italic">Leeg</span>') + '</td><td style="color:var(--muted)">' + (art ? (art.sku||'—') : '') + '</td></tr>'; }).join('') +
+      '</tbody></table></div></div>';
   }
-
-  if (!arts.length && !slots.length) {
-    html = '<div class="empty-state"><div class="icon">🔍</div><p>Geen resultaten gevonden voor "<strong>' + q + '</strong>"</p></div>';
-  }
+  if (!arts.length && !slots.length) html = '<div class="empty-state"><div class="icon">🔍</div><p>Geen resultaten voor "<strong>' + q + '</strong>"</p></div>';
   container.innerHTML = html;
 }
 
-// ── ADMIN: REKKEN ──
+// ── ADMIN REKKEN ──
 function renderAdminRekken() {
   const grid = document.getElementById('admin-rack-grid');
   const emptyEl = document.getElementById('rekken-empty');
   if (!rekken.length) { grid.innerHTML = ''; emptyEl.style.display = 'block'; return; }
   emptyEl.style.display = 'none';
-
   grid.innerHTML = rekken.map(r => {
     const bezet = r.slots.filter(s => s.artikel_id).length;
-    const slots = r.slots.map(s =>
-      '<div class="slot ' + (s.artikel_id ? 'occupied' : '') + '" style="cursor:default">' +
-      '<div class="slot-code">' + s.code + '</div>' +
-      '<div class="slot-' + (s.artikel_id ? 'item' : 'empty-label') + '">' +
-      (s.artikel_id ? (artikelen.find(a => a.id === s.artikel_id) || {}).naam || '?' : 'leeg') + '</div></div>'
-    ).join('');
-    return '<div class="rack-card">' +
-      '<div class="rack-header">' +
-      '<div class="rack-name">Rek ' + r.naam + '</div>' +
-      '<div style="display:flex;gap:8px;align-items:center">' +
-      '<div class="rack-count">' + bezet + '/' + r.slots.length + '</div>' +
-      '<button class="btn-sm" onclick="openVakModal(\'' + r.id + '\',\'' + r.naam + '\')">+ Vakken</button>' +
-      '<button class="btn-danger" onclick="deleteRek(\'' + r.id + '\')">✕</button></div></div>' +
-      '<div class="rack-slots">' + slots + '</div></div>';
+    const svgHtml = buildRekSVG(r.naam, r.slots, null);
+    return '<div class="rack-card"><div class="rack-header"><div class="rack-name">Rek ' + r.naam + '</div><div style="display:flex;gap:8px;align-items:center"><div class="rack-count">' + bezet + '/' + r.slots.length + '</div><button class="btn-sm" onclick="openVakModal(\'' + r.id + '\',\'' + r.naam + '\')">+ Vakken</button><button class="btn-danger" onclick="deleteRek(\'' + r.id + '\')">✕</button></div></div><div style="padding:12px;overflow-x:auto">' + svgHtml + '</div></div>';
   }).join('');
-}
-
-function openRekModal() {
-  document.getElementById('rek-naam').value = '';
-  document.getElementById('rek-vakken').value = 5;
-  document.getElementById('rek-start').value = 1;
-  updateRekPreview();
-  openModal('rek-modal');
-}
-
-document.addEventListener('input', e => {
-  if (['rek-naam','rek-vakken','rek-start'].includes(e.target.id)) updateRekPreview();
-});
-
-function updateRekPreview() {
-  const naam = document.getElementById('rek-naam').value || '?';
-  const n = parseInt(document.getElementById('rek-vakken').value) || 0;
-  const start = parseInt(document.getElementById('rek-start').value) || 1;
-  const examples = [];
-  for (let i = 0; i < Math.min(n, 3); i++) {
-    examples.push(naam + '-' + String(start + i).padStart(2, '0'));
-  }
-  if (n > 3) examples.push('...');
-  document.getElementById('rek-preview').textContent = 'Voorbeeld: ' + examples.join(', ');
-}
-
-async function saveRek() {
-  const naam = document.getElementById('rek-naam').value.trim();
-  const n = parseInt(document.getElementById('rek-vakken').value);
-  const start = parseInt(document.getElementById('rek-start').value);
-  if (!naam) { showToast('Naam is verplicht', true); return; }
-  if (!n || n < 1) { showToast('Minimaal 1 vak', true); return; }
-
-  // check duplicate
-  if (rekken.find(r => r.naam.toLowerCase() === naam.toLowerCase())) {
-    showToast('Rek "' + naam + '" bestaat al', true); return;
-  }
-
-  const { data: rek } = await sb.from('wms_rekken').insert({ naam }).select().single();
-  const slots = [];
-  for (let i = 0; i < n; i++) {
-    slots.push({ rek_id: rek.id, code: naam + '-' + String(start + i).padStart(2, '0'), artikel_id: null });
-  }
-  await sb.from('wms_slots').insert(slots);
-  await loadAll();
-  closeModal('rek-modal');
-  renderAdminRekken();
-  showToast('Rek ' + naam + ' aangemaakt met ' + n + ' vakken ✓');
 }
 
 function openVakModal(rekId, rekNaam) {
@@ -1324,39 +913,26 @@ function openVakModal(rekId, rekNaam) {
   document.getElementById('vak-aantal').value = 1;
   openModal('vak-modal');
 }
-
 async function saveVakken() {
   const rekId = document.getElementById('vak-rek-id').value;
   const n = parseInt(document.getElementById('vak-aantal').value);
   const rek = rekken.find(r => r.id === rekId);
   if (!rek || !n) return;
-
   const lastSlot = rek.slots[rek.slots.length - 1];
   const lastNum = lastSlot ? parseInt(lastSlot.code.split('-').pop()) : 0;
   const slots = [];
-  for (let i = 1; i <= n; i++) {
-    slots.push({ rek_id: rekId, code: rek.naam + '-' + String(lastNum + i).padStart(2, '0'), artikel_id: null });
-  }
+  for (let i = 1; i <= n; i++) slots.push({ rek_id: rekId, code: rek.naam + '-' + String(lastNum + i).padStart(2, '0'), artikel_id: null });
   await sb.from('wms_slots').insert(slots);
-  await loadAll();
-  closeModal('vak-modal');
-  renderAdminRekken();
-  showToast(n + ' vak(ken) toegevoegd ✓');
+  await loadAll(); closeModal('vak-modal'); renderAdminRekken(); showToast(n + ' vak(ken) toegevoegd ✓');
 }
-
 async function deleteRek(id) {
   const rek = rekken.find(r => r.id === id);
   if (!rek) return;
   const bezet = rek.slots.filter(s => s.artikel_id).length;
-  const msg = bezet
-    ? 'Rek ' + rek.naam + ' heeft nog ' + bezet + ' bezette vakken. Toch verwijderen?'
-    : 'Rek ' + rek.naam + ' verwijderen?';
-  if (!confirm(msg)) return;
+  if (!confirm((bezet ? 'Rek ' + rek.naam + ' heeft nog ' + bezet + ' bezette vakken. Toch verwijderen?' : 'Rek ' + rek.naam + ' verwijderen?'))) return;
   await sb.from('wms_slots').delete().eq('rek_id', id);
   await sb.from('wms_rekken').delete().eq('id', id);
-  await loadAll();
-  renderAdminRekken();
-  showToast('Rek verwijderd');
+  await loadAll(); renderAdminRekken(); showToast('Rek verwijderd');
 }
 
 // ── LEVERANCIERS ──
@@ -1366,77 +942,44 @@ function renderLeveranciers() {
   if (!leveranciers.length) { tbody.innerHTML = ''; emptyEl.style.display = 'block'; return; }
   emptyEl.style.display = 'none';
   tbody.innerHTML = leveranciers.map(l =>
-    '<tr><td style="font-weight:600;color:var(--white)">' + l.naam + '</td>' +
-    '<td>' + (l.contact || '—') + '</td>' +
-    '<td>' + (l.email ? '<a href="mailto:' + l.email + '" style="color:var(--green)">' + l.email + '</a>' : '—') + '</td>' +
-    '<td>' + (l.tel || '—') + '</td>' +
-    '<td style="text-align:right;white-space:nowrap">' +
-    '<button class="btn-sm" style="margin-right:6px" onclick="openLevModal(\'' + l.id + '\')">Bewerken</button>' +
-    '<button class="btn-danger" onclick="deleteLev(\'' + l.id + '\')">Verwijder</button></td></tr>'
+    '<tr><td style="font-weight:600">' + l.naam + '</td><td>' + (l.contact||'—') + '</td><td>' + (l.email ? '<a href="mailto:' + l.email + '" style="color:#0a8a63">' + l.email + '</a>' : '—') + '</td><td>' + (l.tel||'—') + '</td><td style="text-align:right;white-space:nowrap"><button class="btn-sm" style="margin-right:6px" onclick="openLevModal(\'' + l.id + '\')">Bewerken</button><button class="btn-danger" onclick="deleteLev(\'' + l.id + '\')">Verwijder</button></td></tr>'
   ).join('');
 }
-
 function openLevModal(id) {
   const l = id ? leveranciers.find(x => x.id === id) : null;
   document.getElementById('lev-modal-title').textContent = l ? 'Leverancier bewerken' : 'Nieuwe leverancier';
   document.getElementById('lev-id').value = id || '';
   document.getElementById('lev-naam').value = l ? l.naam : '';
-  document.getElementById('lev-contact').value = l ? (l.contact || '') : '';
-  document.getElementById('lev-email').value = l ? (l.email || '') : '';
-  document.getElementById('lev-tel').value = l ? (l.tel || '') : '';
+  document.getElementById('lev-contact').value = l ? (l.contact||'') : '';
+  document.getElementById('lev-email').value = l ? (l.email||'') : '';
+  document.getElementById('lev-tel').value = l ? (l.tel||'') : '';
   openModal('lev-modal');
 }
-
 async function saveLeverancier() {
   const naam = document.getElementById('lev-naam').value.trim();
   if (!naam) { showToast('Naam is verplicht', true); return; }
   const id = document.getElementById('lev-id').value;
-  const payload = {
-    naam,
-    contact: document.getElementById('lev-contact').value.trim() || null,
-    email: document.getElementById('lev-email').value.trim() || null,
-    tel: document.getElementById('lev-tel').value.trim() || null,
-  };
-  if (id) { await sb.from('wms_leveranciers').update(payload).eq('id', id); }
-  else { await sb.from('wms_leveranciers').insert(payload); }
-  await loadAll();
-  closeModal('lev-modal');
-  renderLeveranciers();
-  showToast('Leverancier opgeslagen ✓');
+  const payload = { naam, contact: document.getElementById('lev-contact').value.trim()||null, email: document.getElementById('lev-email').value.trim()||null, tel: document.getElementById('lev-tel').value.trim()||null };
+  if (id) await sb.from('wms_leveranciers').update(payload).eq('id', id);
+  else await sb.from('wms_leveranciers').insert(payload);
+  await loadAll(); closeModal('lev-modal'); renderLeveranciers(); showToast('Leverancier opgeslagen ✓');
 }
-
 async function deleteLev(id) {
   if (!confirm('Leverancier verwijderen?')) return;
   await sb.from('wms_leveranciers').delete().eq('id', id);
-  await loadAll();
-  renderLeveranciers();
-  showToast('Leverancier verwijderd');
+  await loadAll(); renderLeveranciers(); showToast('Leverancier verwijderd');
 }
 
-// ── HELPERS ──
-function levNaam(id) {
-  if (!id) return '';
-  const l = leveranciers.find(x => x.id === id);
-  return l ? l.naam : '';
-}
-
+function levNaam(id) { if (!id) return ''; const l = leveranciers.find(x => x.id === id); return l ? l.naam : ''; }
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
 let toastTimer;
 function showToast(msg, isError) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.borderLeftColor = isError ? 'var(--red)' : 'var(--green)';
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+  t.textContent = msg; t.style.borderLeftColor = isError ? 'var(--red)' : 'var(--green)';
+  t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
 }
-
-// close modals on overlay click
-document.querySelectorAll('.modal-overlay').forEach(o => {
-  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
-});
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
 </script>
 </body>
 </html>
