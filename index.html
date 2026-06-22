@@ -593,23 +593,20 @@ function renderArtikelen(){
   const tbody=document.getElementById('artikelen-tbody'),emptyEl=document.getElementById('artikelen-empty');
   if(!list.length){tbody.innerHTML='';emptyEl.style.display='block';return;}
   emptyEl.style.display='none';
-  tbody.innerHTML=list.map(function(a){
-    var slot=allSlots.find(function(s){return s.id===a.locatie_slot_id;});
-    var totaalSt=a.aantal_per_doos&&a.aantal_dozen?(a.aantal_per_doos*a.aantal_dozen)+' st':'';
-    var voorraad=a.aantal_dozen!=null?a.aantal_dozen+' doos'+(totaalSt?' ('+totaalSt+')':''):'&#8212;';
-    var foto=a.foto_url?('<img src="'+a.foto_url+'" style="width:36px;height:36px;object-fit:cover;border-radius:4px;border:1px solid #E2E4EA">'):('<div style="width:36px;height:36px;background:#F5F6F8;border-radius:4px;border:1px solid #E2E4EA;display:flex;align-items:center;justify-content:center;color:#6B7280">&#128247;</div>');
-    var editBtn='<button class="btn-sm" style="margin-right:6px" onclick="openArtikelModal(this.dataset.id)" data-id="'+a.id+'">Bewerken</button>';
-    var delBtn='<button class="btn-danger" onclick="deleteArtikel(this.dataset.id)" data-id="'+a.id+'">Verwijder</button>';
-    var rows='<tr>';
-    rows+='<td>'+foto+'</td>';
-    rows+='<td style="color:var(--muted);font-size:12px">'+(a.sku||'&#8212;')+'</td>';
-    rows+='<td><div style="font-weight:600">'+a.naam+'</div>'+(a.omschrijving?'<div style="color:var(--muted);font-size:12px">'+a.omschrijving+'</div>':'')+'</td>';
-    rows+='<td>'+(a.leverancier_id?'<span class="sup-badge">'+levNaam(a.leverancier_id)+'</span>':'<span style="color:var(--muted)">&#8212;</span>')+'</td>';
-    rows+='<td>'+(slot?'<span class="loc-badge">&#128205; '+slot.code+'</span>':'<span class="loc-empty">niet toegewezen</span>')+'</td>';
-    rows+='<td style="font-size:12px"><div style="font-weight:600">'+voorraad+'</div>'+(a.gewicht||a.afmeting?'<div style="color:var(--muted);font-size:11px">'+(a.gewicht?a.gewicht+'kg ':'')+( a.afmeting||'')+'</div>':'')+'</td>';
-    rows+='<td style="text-align:right;white-space:nowrap">'+editBtn+delBtn+'</td>';
-    rows+='</tr>';
-    return rows;
+  tbody.innerHTML=list.map(a=>{
+    const slot=allSlots.find(s=>s.id===a.locatie_slot_id);
+    const totaalSt=a.aantal_per_doos&&a.aantal_dozen?(a.aantal_per_doos*a.aantal_dozen)+' st':'';
+    const voorraad=a.aantal_dozen!=null&&a.aantal_dozen!==''?a.aantal_dozen+' doos'+(totaalSt?' ('+totaalSt+')':''):'&#8212;';
+    const foto=a.foto_url?'<img src="'+a.foto_url+'" style="width:36px;height:36px;object-fit:cover;border-radius:4px;border:1px solid var(--border)">':'<div style="width:36px;height:36px;background:var(--bg);border-radius:4px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:18px">&#128247;</div>';
+    return'<tr>'+
+      '<td>'+foto+'</td>'+
+      '<td style="color:var(--muted);font-size:12px">'+(a.sku||'&#8212;')+'</td>'+
+      '<td><div style="font-weight:600">'+a.naam+'</div>'+(a.omschrijving?'<div style="color:var(--muted);font-size:12px">'+a.omschrijving+'</div>':'')+'</td>'+
+      '<td>'+(a.leverancier_id?'<span class="sup-badge">'+levNaam(a.leverancier_id)+'</span>':'<span style="color:var(--muted)">&#8212;</span>')+'</td>'+
+      '<td>'+(slot?'<span class="loc-badge">&#128205; '+slot.code+'</span>':'<span class="loc-empty">niet toegewezen</span>')+'</td>'+
+      '<td style="font-size:12px"><div style="font-weight:600">'+voorraad+'</div>'+(a.gewicht||a.afmeting?'<div style="color:var(--muted);font-size:11px">'+(a.gewicht?a.gewicht+'kg ':'')+( a.afmeting||'')+'</div>':'')+'</td>'+
+      '<td style="text-align:right;white-space:nowrap"><button class="btn-sm" style="margin-right:6px" onclick="openArtikelModal(''+a.id+'')">Bewerken</button><button class="btn-danger" onclick="deleteArtikel(''+a.id+'')">Verwijder</button></td>'+
+    '</tr>';
   }).join('');
 }
 
