@@ -332,15 +332,39 @@ tr:hover td{background:var(--bg);}
       </div>
       <input type="hidden" id="art-foto-url">
     </div>
-    <div style="margin-top:8px">
-      <div class="field-row"><div class="field-label">Rek</div><select id="art-rek-select" class="field-input" onchange="onRekSelect()"><option value="">-- kies rek --</option></select></div>
+    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:14px">
+      <div class="field-label" style="margin-bottom:10px">Locatie</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:end">
+        <div class="field-row" style="margin-bottom:0">
+          <div class="field-label">Rek</div>
+          <select id="art-rek-select" class="field-input" onchange="onRekSelect()" style="margin-bottom:0">
+            <option value="">-- kies rek --</option>
+          </select>
+        </div>
+        <div class="field-row" style="margin-bottom:0">
+          <div class="field-label">Laag</div>
+          <select id="art-laag-select" class="field-input" onchange="onLaagSelect()" disabled style="margin-bottom:0">
+            <option value="">-- laag --</option>
+          </select>
+        </div>
+        <div class="field-row" style="margin-bottom:0">
+          <div class="field-label">Vak</div>
+          <select id="art-vak-select" class="field-input" onchange="onVakSelect()" disabled style="margin-bottom:0">
+            <option value="">-- vak --</option>
+          </select>
+        </div>
+      </div>
       <select id="art-sectie-select" style="display:none"></select>
-    </div>
-    <input type="hidden" id="art-locatie">
-    <div id="art-visueel-wrap" style="display:none">
-      <div class="rek-visueel-box">
-        <div class="rek-visueel-box-title" style="display:flex;align-items:center;justify-content:space-between"><span>👆 Klik op een vak om de locatie te kiezen</span><span id="art-gekozen-slot" style="color:var(--green);font-weight:600;background:var(--green-light);padding:3px 10px;border-radius:5px;font-size:13px"></span></div>
-        <div id="art-visueel-svg-wrap" style="overflow-x:auto;margin-top:8px"></div>
+      <input type="hidden" id="art-locatie">
+      <!-- Visuele pin: read-only SVG van het rek met highlight -->
+      <div id="art-visueel-wrap" style="display:none;margin-top:14px">
+        <div class="rek-visueel-box">
+          <div class="rek-visueel-box-title" style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:12px;color:var(--muted)">📍 Locatie in rek</span>
+            <span id="art-gekozen-slot" style="color:var(--green);font-weight:700;font-size:14px;font-family:'Poppins',sans-serif"></span>
+          </div>
+          <div id="art-visueel-svg-wrap" style="overflow-x:auto;margin-top:8px;pointer-events:none"></div>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -723,67 +747,135 @@ function openArtikelModal(id){
   levSel.innerHTML='<option value="">-- geen --</option>'+leveranciers.map(l=>'<option value="'+l.id+'"'+(a&&a.leverancier_id===l.id?' selected':'')+'>'+l.naam+'</option>').join('');
   const rekSel=document.getElementById('art-rek-select');
   rekSel.innerHTML='<option value="">-- kies rek --</option>'+rekken.map(r=>'<option value="'+r.id+'">'+r.naam+'</option>').join('');
-  document.getElementById('art-sectie-select').innerHTML='<option value="">-- kies sectie --</option>';
+  document.getElementById('art-sectie-select').innerHTML='';
   document.getElementById('art-locatie').value='';
   document.getElementById('art-gekozen-slot').textContent='';
-  document.getElementById('art-gekozen-slot').style.display='none';
   document.getElementById('art-visueel-wrap').style.display='none';
+  // Reset laag en vak dropdowns
+  const laagSel=document.getElementById('art-laag-select');
+  const vakSel=document.getElementById('art-vak-select');
+  laagSel.innerHTML='<option value="">-- laag --</option>';laagSel.disabled=true;
+  vakSel.innerHTML='<option value="">-- vak --</option>';vakSel.disabled=true;
   if(a&&a.locatie_slot_id){
+    // Zoek het slot en vul alle 3 dropdowns in
     for(const r of rekken){for(const sec of r.secties){const sl=sec.slots.find(s=>s.id===a.locatie_slot_id);if(sl){
-      rekSel.value=r.id;populateSectieSelect(r.id,sec.id);
-      document.getElementById('art-sectie-select').value=sec.id;
-      document.getElementById('art-locatie').value=a.locatie_slot_id;
-      document.getElementById('art-gekozen-slot').textContent='Gekozen: '+sl.code;
+      rekSel.value=r.id;
+      // Vul laag dropdown
+      const maxLagen=Math.max(...r.secties.map(s2=>s2.lagen));
+      laagSel.innerHTML='<option value="">-- laag --</option>';
+      for(let l=0;l<maxLagen;l++){const lb=l===0?'Vloer (0)':'Laag '+l;laagSel.innerHTML+='<option value="'+l+'">'+lb+'</option>';}
+      laagSel.disabled=false;
+      // Bepaal de laag uit de slotcode
+      const codeRest=sl.code.slice(r.naam.length);
+      const slotLaag=parseInt(codeRest[0])||0;
+      laagSel.value=String(slotLaag);
+      // Vul vak dropdown voor deze laag
+      const vakken=[];
+      r.secties.forEach(sec2=>sec2.slots.forEach(sl2=>{
+        const cr=sl2.code.slice(r.naam.length);
+        if((parseInt(cr[0])||0)===slotLaag)vakken.push(sl2);
+      }));
+      vakken.sort((a2,b2)=>a2.code.localeCompare(b2.code));
+      vakSel.innerHTML='<option value="">-- vak --</option>';
+      vakken.forEach(sl2=>{vakSel.innerHTML+='<option value="'+sl2.id+'" data-code="'+sl2.code+'"'+(sl2.artikel_id&&sl2.id!==sl.id?' style="color:var(--muted)"':'')+'>'+sl2.code+(sl2.artikel_id&&sl2.id!==sl.id?' (bezet)':' (vrij)')+'</option>';});
+      vakSel.disabled=false;
+      vakSel.value=sl.id;
+      document.getElementById('art-locatie').value=sl.id;
+      document.getElementById('art-gekozen-slot').textContent=sl.code;
       updateArtikelVisueel();break;
     }}}
   }
   openModal('artikel-modal');
 }
 
+// ── LOCATIE DROPDOWNS (Rek → Laag → Vak) ──
 function onRekSelect(){
   const rekId=document.getElementById('art-rek-select').value;
   populateSectieSelect(rekId,null);
+  // Reset laag en vak
+  const laagSel=document.getElementById('art-laag-select');
+  const vakSel=document.getElementById('art-vak-select');
+  laagSel.innerHTML='<option value="">-- laag --</option>';
+  laagSel.disabled=true;
+  vakSel.innerHTML='<option value="">-- vak --</option>';
+  vakSel.disabled=true;
   document.getElementById('art-locatie').value='';
   document.getElementById('art-gekozen-slot').textContent='';
-  document.getElementById('art-gekozen-slot').style.display='none';
+  document.getElementById('art-visueel-wrap').style.display='none';
+  if(!rekId)return;
+  const rek=rekken.find(r=>r.id===rekId);
+  if(!rek||!rek.secties.length)return;
+  // Verzamel alle unieke lagen van dit rek
+  const maxLagen=Math.max(...rek.secties.map(s=>s.lagen));
+  laagSel.innerHTML='<option value="">-- laag --</option>';
+  for(let l=0;l<maxLagen;l++){
+    const label=l===0?'Vloer (0)':'Laag '+l;
+    laagSel.innerHTML+='<option value="'+l+'">'+label+'</option>';
+  }
+  laagSel.disabled=false;
+}
+
+function onLaagSelect(){
+  const rekId=document.getElementById('art-rek-select').value;
+  const laag=document.getElementById('art-laag-select').value;
+  const vakSel=document.getElementById('art-vak-select');
+  vakSel.innerHTML='<option value="">-- vak --</option>';
+  vakSel.disabled=true;
+  document.getElementById('art-locatie').value='';
+  document.getElementById('art-gekozen-slot').textContent='';
+  document.getElementById('art-visueel-wrap').style.display='none';
+  if(!rekId||laag==='')return;
+  const rek=rekken.find(r=>r.id===rekId);
+  if(!rek)return;
+  // Verzamel alle slots op deze laag (over alle secties)
+  const laagNum=parseInt(laag);
+  const vakken=[];
+  rek.secties.forEach(sec=>{
+    sec.slots.forEach(sl=>{
+      // Slot code formaat: reknaam + laag + positie(2) → laag zit op positie reknaam.length
+      const codeRest=sl.code.slice(rek.naam.length); // bijv. "001" of "101"
+      const slotLaag=parseInt(codeRest[0])||0;
+      if(slotLaag===laagNum)vakken.push(sl);
+    });
+  });
+  // Sorteer op code
+  vakken.sort((a,b)=>a.code.localeCompare(b.code));
+  vakSel.innerHTML='<option value="">-- vak --</option>';
+  vakken.forEach(sl=>{
+    const bezet=sl.artikel_id?` (bezet)`:' (vrij)';
+    vakSel.innerHTML+='<option value="'+sl.id+'" data-code="'+sl.code+'"'+(sl.artikel_id?' style="color:var(--muted)"':'')+'>'+sl.code+bezet+'</option>';
+  });
+  vakSel.disabled=false;
+}
+
+function onVakSelect(){
+  const vakSel=document.getElementById('art-vak-select');
+  const slotId=vakSel.value;
+  const slotCode=vakSel.options[vakSel.selectedIndex]?.dataset?.code||'';
+  document.getElementById('art-locatie').value=slotId||'';
+  document.getElementById('art-gekozen-slot').textContent=slotCode?slotCode:'';
   updateArtikelVisueel();
 }
+
 function populateSectieSelect(rekId,selectedSecId){
   const sel=document.getElementById('art-sectie-select');
-  if(!rekId){sel.innerHTML='<option value="">-- kies sectie --</option>';return;}
+  if(!rekId){sel.innerHTML='';return;}
   const rek=rekken.find(r=>r.id===rekId);
-  sel.innerHTML='<option value="">-- kies sectie --</option>'+(rek?rek.secties.map(s=>'<option value="'+s.id+'"'+(s.id===selectedSecId?' selected':'')+'>Stuk '+s.sectie_nr+' ('+s.lagen+' lagen x '+s.per_laag+' plekken)</option>').join(''):'');
+  sel.innerHTML=(rek?rek.secties.map(s=>'<option value="'+s.id+'"'+(s.id===selectedSecId?' selected':'')+'>'+s.sectie_nr+'</option>').join(''):'');
 }
-function onSectieSelect(){
-  document.getElementById('art-locatie').value='';
-  document.getElementById('art-gekozen-slot').textContent='';
-  updateArtikelVisueel();
-}
-function pickSlot(slotId,slotCode){
-  document.getElementById('art-locatie').value=slotId;
-  const badge=document.getElementById('art-gekozen-slot');
-  badge.textContent='✓ '+slotCode;
-  badge.style.display='inline-block';
-  updateArtikelVisueel();
-}
+
 function updateArtikelVisueel(){
   const rekId=document.getElementById('art-rek-select').value;
   const wrap=document.getElementById('art-visueel-wrap');
-  if(!rekId){wrap.style.display='none';return;}
+  const slotId=document.getElementById('art-locatie').value;
+  if(!rekId||!slotId){wrap.style.display='none';return;}
   const rek=rekken.find(r=>r.id===rekId);
   if(!rek){wrap.style.display='none';return;}
-  const slotId=document.getElementById('art-locatie').value;
   const selectedSlot=rek.secties.flatMap(s=>s.slots).find(s=>s.id===slotId);
+  if(!selectedSlot){wrap.style.display='none';return;}
   wrap.style.display='block';
-  // Toon het hele rek — klik op een vak om te selecteren
-  const svgWrap=document.getElementById('art-visueel-svg-wrap');
-  svgWrap.innerHTML=buildRekHTML(rek,selectedSlot?selectedSlot.code:null,'pick');
-  // Event delegation: klik op data-action="pick" vakken
-  svgWrap.onclick=function(e){
-    const g=e.target.closest('g[data-action="pick"]');
-    if(!g)return;
-    pickSlot(g.dataset.slotid,g.dataset.slotcode);
-  };
+  // Toon read-only SVG met pin op het gekozen vak (pointer-events:none gezet op de wrap)
+  document.getElementById('art-visueel-svg-wrap').innerHTML=buildRekHTML(rek,selectedSlot.code,false);
 }
 
 async function saveArtikel(){
