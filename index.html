@@ -676,6 +676,8 @@ function renderLocaties(){
   const container=document.getElementById('locaties-container');
   const emptyEl=document.getElementById('loc-empty');
 
+  // DEBUG
+  console.log('[LOC DEBUG] rekken:', rekken.length, rekken.map(r=>({naam:r.naam,secties:r.secties.length,slots:r.secties.flatMap(s=>s.slots).length,eersteSlots:r.secties.flatMap(s=>s.slots).slice(0,3).map(s=>s.code)})));
   // Verzamel alle slots over alle rekken, gesorteerd op code
   const alleSlots=[];
   rekken.forEach(r=>{
