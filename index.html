@@ -332,14 +332,14 @@ tr:hover td{background:var(--bg);}
       </div>
       <input type="hidden" id="art-foto-url">
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
+    <div style="margin-top:8px">
       <div class="field-row"><div class="field-label">Rek</div><select id="art-rek-select" class="field-input" onchange="onRekSelect()"><option value="">-- kies rek --</option></select></div>
-      <div class="field-row"><div class="field-label">Sectie</div><select id="art-sectie-select" class="field-input" onchange="onSectieSelect()"><option value="">-- kies sectie --</option></select></div>
+      <select id="art-sectie-select" style="display:none"></select>
     </div>
     <input type="hidden" id="art-locatie">
     <div id="art-visueel-wrap" style="display:none">
       <div class="rek-visueel-box">
-        <div class="rek-visueel-box-title">Klik op een vak om de locatie te kiezen <span id="art-gekozen-slot" style="color:var(--green);font-weight:600;margin-left:8px"></span></div>
+        <div class="rek-visueel-box-title" style="display:flex;align-items:center;justify-content:space-between"><span>👆 Klik op een vak om de locatie te kiezen</span><span id="art-gekozen-slot" style="color:var(--green);font-weight:600;background:var(--green-light);padding:3px 10px;border-radius:5px;font-size:13px"></span></div>
         <div id="art-visueel-svg-wrap" style="overflow-x:auto;margin-top:8px"></div>
       </div>
     </div>
@@ -542,8 +542,8 @@ function buildSectieSVG(rekNaam,sectieNr,lagen,perLaag,slots,highlightCode,click
       let codeCol=isHL?'#064d38':isOcc?'#0a8a63':'#1D252D';
       let subCol=isHL?'#064d38':'#6B7280';
       let clickAttr='';
-      if(clickable==='slot')clickAttr=` onclick="openSlotModal('${slot.id}')" style="cursor:pointer"`;
-      else if(clickable==='pick')clickAttr=` onclick="pickSlot('${slot.id}','${slot.code}')" style="cursor:pointer;outline:none"`;
+      if(clickable==='slot')clickAttr=` data-action="slot" data-slotid="${slot.id}" style="cursor:pointer"`;
+      else if(clickable==='pick')clickAttr=` data-action="pick" data-slotid="${slot.id}" data-slotcode="${slot.code}" style="cursor:pointer;outline:none"`;
       s+='<g'+clickAttr+'>';
       s+='<rect x="'+x+'" y="'+y+'" width="'+CW+'" height="'+CH+'" rx="5" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.5"/>';
       s+='<text x="'+(x+CW/2)+'" y="'+(y+13)+'" text-anchor="middle" font-family="Poppins,sans-serif" font-size="9" font-weight="700" fill="'+codeCol+'">'+slot.code+'</text>';
@@ -645,6 +645,12 @@ function renderLocaties(){
       '<div class="rek-secties-wrap">'+buildRekHTML(r,null,'slot')+'</div>'+
       '</div>';
   }).join('');
+  // Event delegation voor slot-klikken in de locatiepagina
+  container.onclick=function(e){
+    const g=e.target.closest('g[data-action="slot"]');
+    if(!g)return;
+    openSlotModal(g.dataset.slotid);
+  };
 }
 
 function openSlotModal(slotId){
@@ -720,6 +726,7 @@ function openArtikelModal(id){
   document.getElementById('art-sectie-select').innerHTML='<option value="">-- kies sectie --</option>';
   document.getElementById('art-locatie').value='';
   document.getElementById('art-gekozen-slot').textContent='';
+  document.getElementById('art-gekozen-slot').style.display='none';
   document.getElementById('art-visueel-wrap').style.display='none';
   if(a&&a.locatie_slot_id){
     for(const r of rekken){for(const sec of r.secties){const sl=sec.slots.find(s=>s.id===a.locatie_slot_id);if(sl){
@@ -738,6 +745,7 @@ function onRekSelect(){
   populateSectieSelect(rekId,null);
   document.getElementById('art-locatie').value='';
   document.getElementById('art-gekozen-slot').textContent='';
+  document.getElementById('art-gekozen-slot').style.display='none';
   updateArtikelVisueel();
 }
 function populateSectieSelect(rekId,selectedSecId){
@@ -753,7 +761,9 @@ function onSectieSelect(){
 }
 function pickSlot(slotId,slotCode){
   document.getElementById('art-locatie').value=slotId;
-  document.getElementById('art-gekozen-slot').textContent='Gekozen: '+slotCode;
+  const badge=document.getElementById('art-gekozen-slot');
+  badge.textContent='✓ '+slotCode;
+  badge.style.display='inline-block';
   updateArtikelVisueel();
 }
 function updateArtikelVisueel(){
@@ -765,7 +775,15 @@ function updateArtikelVisueel(){
   const slotId=document.getElementById('art-locatie').value;
   const selectedSlot=rek.secties.flatMap(s=>s.slots).find(s=>s.id===slotId);
   wrap.style.display='block';
-  document.getElementById('art-visueel-svg-wrap').innerHTML=buildRekHTML(rek,selectedSlot?selectedSlot.code:null,'pick');
+  // Toon het hele rek — klik op een vak om te selecteren
+  const svgWrap=document.getElementById('art-visueel-svg-wrap');
+  svgWrap.innerHTML=buildRekHTML(rek,selectedSlot?selectedSlot.code:null,'pick');
+  // Event delegation: klik op data-action="pick" vakken
+  svgWrap.onclick=function(e){
+    const g=e.target.closest('g[data-action="pick"]');
+    if(!g)return;
+    pickSlot(g.dataset.slotid,g.dataset.slotcode);
+  };
 }
 
 async function saveArtikel(){
