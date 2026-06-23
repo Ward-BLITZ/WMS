@@ -113,6 +113,24 @@ tr:hover td{background:var(--bg);}
 .add-sectie-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;background:var(--green-light);color:#0a8a63;border:1px dashed rgba(0,223,163,.5);border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;width:100%;justify-content:center;}
 .add-sectie-btn:hover{background:var(--green);color:var(--dark);}
 
+
+/* ── LOCATIE TABEL ── */
+.loc-tabel{display:flex;flex-direction:column;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.loc-rij{display:grid;grid-template-columns:220px 1fr 1fr;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border);gap:16px;transition:background .1s;}
+.loc-rij:last-child{border-bottom:none;}
+.loc-rij:hover{background:var(--bg);}
+.loc-rij-vrij{opacity:.55;}
+.loc-cel{display:flex;flex-direction:column;gap:3px;}
+.loc-cel-code{min-width:0;}
+.loc-code-badge{font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;color:var(--dark);letter-spacing:.5px;}
+.loc-code-sub{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;}
+.loc-tag{font-size:11px;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 6px;}
+.loc-cel-product{align-items:flex-start;}
+.loc-sku{font-size:11px;color:var(--muted);font-family:'Poppins',sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+.loc-naam{font-size:13px;font-weight:600;color:var(--dark);}
+.loc-vrij-label{font-size:12px;color:var(--muted);font-style:italic;}
+.loc-cel-omschrijving{align-items:flex-end;}
+.loc-omschrijving{font-size:12px;color:var(--muted);text-align:right;}
 /* ── LOCATIE PAGE ── */
 .locatie-rek-wrap{margin-bottom:28px;}
 .locatie-rek-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
@@ -216,8 +234,8 @@ tr:hover td{background:var(--bg);}
       <!-- LOCATIES -->
       <div id="page-locaties" style="display:none">
         <div class="page-header">
-          <div><div class="page-title">Locaties</div><div class="page-sub">Klik op een vak om een artikel te koppelen</div></div>
-          <input class="search-input" style="width:220px" id="loc-search" placeholder="Zoek rek of code..." oninput="renderLocaties()">
+          <div><div class="page-title">Locaties</div><div class="page-sub">Overzicht van alle vakken en hun inhoud</div></div>
+          <input class="search-input" style="width:220px" id="loc-search" placeholder="Zoek code, product, rek..." oninput="renderLocaties()">
         </div>
         <div id="locaties-container"></div>
         <div id="loc-empty" class="empty-state" style="display:none"><div class="icon">🗄️</div><p>Nog geen rekken. Ga naar <strong>Rekken & Secties</strong>.</p></div>
@@ -657,24 +675,61 @@ function renderLocaties(){
   const q=(document.getElementById('loc-search').value||'').toLowerCase();
   const container=document.getElementById('locaties-container');
   const emptyEl=document.getElementById('loc-empty');
-  const filtered=rekken.filter(r=>!q||r.naam.toLowerCase().includes(q)||r.secties.some(s=>s.slots.some(sl=>sl.code.toLowerCase().includes(q))));
-  if(!filtered.length){container.innerHTML='';emptyEl.style.display='block';return;}
+
+  // Verzamel alle slots over alle rekken, gesorteerd op code
+  const alleSlots=[];
+  rekken.forEach(r=>{
+    r.secties.forEach(sec=>{
+      sec.slots.forEach(sl=>{
+        // Splits code in rek / laag / vak
+        const rest=sl.code.slice(r.naam.length);          // bijv. "101"
+        const laagChar=rest[0]||'0';
+        const vakNr=rest.slice(1)||'';
+        const laagLabel=laagChar==='0'?'Vloer':'Laag '+laagChar;
+        const art=sl.artikel_id?artikelen.find(a=>a.id===sl.artikel_id):null;
+        // Filter
+        if(q){
+          const haystack=(sl.code+' '+(art?art.naam:'')+(art?art.sku||'':'')+(art?art.omschrijving||'':'')+r.naam).toLowerCase();
+          if(!haystack.includes(q))return;
+        }
+        alleSlots.push({sl,rek:r.naam,laagLabel,laagChar,vakNr,art,code:sl.code});
+      });
+    });
+  });
+
+  if(!alleSlots.length){container.innerHTML='';emptyEl.style.display='block';return;}
   emptyEl.style.display='none';
-  container.innerHTML=filtered.map(r=>{
-    const allSlots=r.secties.flatMap(s=>s.slots);
-    const bezet=allSlots.filter(s=>s.artikel_id).length;
-    const pct=allSlots.length?Math.round(bezet/allSlots.length*100):0;
-    return '<div class="rek-blok">'+
-      '<div class="rek-blok-header"><div><div class="rek-blok-naam">Rek '+r.naam+'</div><div class="rek-blok-meta">'+r.secties.length+' sectie(s) · '+bezet+'/'+allSlots.length+' bezet ('+pct+'%)</div></div></div>'+
-      '<div class="rek-secties-wrap">'+buildRekHTML(r,null,'slot')+'</div>'+
-      '</div>';
+
+  // Sorteer: rek alfabetisch, dan laag, dan vak
+  alleSlots.sort((a,b)=>a.code.localeCompare(b.code,undefined,{numeric:true}));
+
+  const rijen=alleSlots.map(({sl,rek,laagLabel,vakNr,art,code})=>{
+    const isVrij=!art;
+    return '<div class="loc-rij'+(isVrij?' loc-rij-vrij':'')+'">'
+      // Links: locatiecode opgesplitst
+      +'<div class="loc-cel loc-cel-code">'
+        +'<div class="loc-code-badge">'+code+'</div>'
+        +'<div class="loc-code-sub">'
+          +'<span class="loc-tag">Rek <strong>'+rek+'</strong></span>'
+          +'<span class="loc-tag">'+laagLabel+'</span>'
+          +'<span class="loc-tag">Vak <strong>'+vakNr+'</strong></span>'
+        +'</div>'
+      +'</div>'
+      // Midden: SKU / productnaam
+      +'<div class="loc-cel loc-cel-product">'
+        +(art
+          ?'<div class="loc-sku">'+(art.sku||'—')+'</div><div class="loc-naam">'+art.naam+'</div>'
+          :'<span class="loc-vrij-label">leeg</span>'
+        )
+      +'</div>'
+      // Rechts: omschrijving
+      +'<div class="loc-cel loc-cel-omschrijving">'
+        +(art&&art.omschrijving?'<span class="loc-omschrijving">'+art.omschrijving+'</span>':'')
+      +'</div>'
+    +'</div>';
   }).join('');
-  // Event delegation voor slot-klikken in de locatiepagina
-  container.onclick=function(e){
-    const g=e.target.closest('g[data-action="slot"]');
-    if(!g)return;
-    openSlotModal(g.dataset.slotid);
-  };
+
+  container.innerHTML='<div class="loc-tabel">'+rijen+'</div>';
 }
 
 function openSlotModal(slotId){
