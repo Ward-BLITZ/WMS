@@ -766,18 +766,17 @@ function openArtikelModal(id){
       for(let l=0;l<maxLagen;l++){const lb=l===0?'Vloer (0)':'Laag '+l;laagSel.innerHTML+='<option value="'+l+'">'+lb+'</option>';}
       laagSel.disabled=false;
       // Bepaal de laag uit de slotcode
-      const codeRest=sl.code.slice(r.naam.length);
-      const slotLaag=parseInt(codeRest[0])||0;
+      const{laag:slotLaag,vak:slotVak}=slotLaagVak(sl,r.naam);
       laagSel.value=String(slotLaag);
       // Vul vak dropdown voor deze laag
-      const vakken=[];
+      const vakken2=[];
       r.secties.forEach(sec2=>sec2.slots.forEach(sl2=>{
-        const cr=sl2.code.slice(r.naam.length);
-        if((parseInt(cr[0])||0)===slotLaag)vakken.push(sl2);
+        const{laag:sl2Laag,vak:sl2Vak}=slotLaagVak(sl2,r.naam);
+        if(sl2Laag===slotLaag)vakken2.push({sl:sl2,vak:sl2Vak});
       }));
-      vakken.sort((a2,b2)=>a2.code.localeCompare(b2.code));
+      vakken2.sort((a2,b2)=>a2.vak.localeCompare(b2.vak));
       vakSel.innerHTML='<option value="">-- vak --</option>';
-      vakken.forEach(sl2=>{vakSel.innerHTML+='<option value="'+sl2.id+'" data-code="'+sl2.code+'"'+(sl2.artikel_id&&sl2.id!==sl.id?' style="color:var(--muted)"':'')+'>'+sl2.code+(sl2.artikel_id&&sl2.id!==sl.id?' (bezet)':' (vrij)')+'</option>';});
+      vakken2.forEach(({sl:sl2,vak:sl2Vak})=>{const bezet2=sl2.artikel_id&&sl2.id!==sl.id?' (bezet)':'';vakSel.innerHTML+='<option value="'+sl2.id+'" data-code="'+sl2.code+'"'+(sl2.artikel_id&&sl2.id!==sl.id?' style="color:var(--muted)"':'')+'>'+sl2Vak+bezet2+'</option>';});
       vakSel.disabled=false;
       vakSel.value=sl.id;
       document.getElementById('art-locatie').value=sl.id;
@@ -815,6 +814,15 @@ function onRekSelect(){
   laagSel.disabled=false;
 }
 
+function slotLaagVak(sl,rekNaam){
+  // Code formaat: reknaam (variabele lengte) + laag (1 cijfer) + vak (2 cijfers)
+  // Gebruik toLowerCase voor robuuste matching
+  const rest=sl.code.toLowerCase().slice(rekNaam.toLowerCase().length); // bijv. "101" of "001"
+  const laag=parseInt(rest[0]??'0');
+  const vak=rest.slice(1); // laatste 2 cijfers
+  return{laag,vak};
+}
+
 function onLaagSelect(){
   const rekId=document.getElementById('art-rek-select').value;
   const laag=document.getElementById('art-laag-select').value;
@@ -827,23 +835,19 @@ function onLaagSelect(){
   if(!rekId||laag==='')return;
   const rek=rekken.find(r=>r.id===rekId);
   if(!rek)return;
-  // Verzamel alle slots op deze laag (over alle secties)
   const laagNum=parseInt(laag);
   const vakken=[];
   rek.secties.forEach(sec=>{
     sec.slots.forEach(sl=>{
-      // Slot code formaat: reknaam + laag + positie(2) → laag zit op positie reknaam.length
-      const codeRest=sl.code.slice(rek.naam.length); // bijv. "001" of "101"
-      const slotLaag=parseInt(codeRest[0])||0;
-      if(slotLaag===laagNum)vakken.push(sl);
+      const{laag:slLaag,vak}=slotLaagVak(sl,rek.naam);
+      if(slLaag===laagNum)vakken.push({sl,vak});
     });
   });
-  // Sorteer op code
-  vakken.sort((a,b)=>a.code.localeCompare(b.code));
+  vakken.sort((a,b)=>a.vak.localeCompare(b.vak));
   vakSel.innerHTML='<option value="">-- vak --</option>';
-  vakken.forEach(sl=>{
-    const bezet=sl.artikel_id?` (bezet)`:' (vrij)';
-    vakSel.innerHTML+='<option value="'+sl.id+'" data-code="'+sl.code+'"'+(sl.artikel_id?' style="color:var(--muted)"':'')+'>'+sl.code+bezet+'</option>';
+  vakken.forEach(({sl,vak})=>{
+    const bezet=sl.artikel_id?' (bezet)':'';
+    vakSel.innerHTML+='<option value="'+sl.id+'" data-code="'+sl.code+'"'+(sl.artikel_id?' style="color:var(--muted)"':'')+'>'+vak+bezet+'</option>';
   });
   vakSel.disabled=false;
 }
