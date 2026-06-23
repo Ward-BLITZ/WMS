@@ -836,10 +836,14 @@ function onLaagSelect(){
   const rek=rekken.find(r=>r.id===rekId);
   if(!rek)return;
   const laagNum=parseInt(laag);
+  // DEBUG: toon alle slot codes in console
+  const alleCodes=rek.secties.flatMap(s=>s.slots).map(s=>s.code);
+  console.log('[WMS DEBUG] Rek naam:', rek.naam, '| Laag gezocht:', laagNum, '| Alle slot codes:', alleCodes);
   const vakken=[];
   rek.secties.forEach(sec=>{
     sec.slots.forEach(sl=>{
       const{laag:slLaag,vak}=slotLaagVak(sl,rek.naam);
+      console.log('[WMS DEBUG] slot:', sl.code, '→ parsed laag:', slLaag, 'vak:', vak, '| match?', slLaag===laagNum);
       if(slLaag===laagNum)vakken.push({sl,vak});
     });
   });
