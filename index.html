@@ -678,34 +678,34 @@ function renderLocaties(){
 
   // DEBUG
   console.log('[LOC DEBUG] rekken:', rekken.length, rekken.map(r=>({naam:r.naam,secties:r.secties.length,slots:r.secties.flatMap(s=>s.slots).length,eersteSlots:r.secties.flatMap(s=>s.slots).slice(0,3).map(s=>s.code)})));
-  // Verzamel alle slots over alle rekken, gesorteerd op code
+  // Bouw locatielijst vanuit rekken-config + artikelen.locatie
+  // Genereer alle mogelijke locatiecodes op basis van rek-configuratie
   const alleSlots=[];
   rekken.forEach(r=>{
-    r.secties.forEach(sec=>{
-      sec.slots.forEach(sl=>{
-        // Splits code in rek / laag / vak
-        const rest=sl.code.slice(r.naam.length);          // bijv. "101"
-        const laagChar=rest[0]||'0';
-        const vakNr=rest.slice(1)||'';
-        const laagLabel=laagChar==='0'?'Vloer':'Laag '+laagChar;
-        const art=sl.artikel_id?artikelen.find(a=>a.id===sl.artikel_id):null;
-        // Filter
+    const maxLagen=r.secties.length?Math.max(...r.secties.map(s=>s.lagen)):0;
+    const totalPlaatsen=r.secties.reduce((s,sec)=>s+sec.per_laag,0);
+    for(let laag=0;laag<maxLagen;laag++){
+      for(let pos=1;pos<=totalPlaatsen;pos++){
+        const code=r.naam+laag+String(pos).padStart(2,'0');
+        const laagChar=String(laag);
+        const vakNr=String(pos).padStart(2,'0');
+        const laagLabel=laag===0?'Vloer':'Laag '+laag;
+        const art=artikelen.find(a=>a.locatie&&a.locatie.toLowerCase()===code.toLowerCase())||null;
         if(q){
-          const haystack=(sl.code+' '+(art?art.naam:'')+(art?art.sku||'':'')+(art?art.omschrijving||'':'')+r.naam).toLowerCase();
+          const haystack=(code+' '+(art?art.naam:'')+(art?art.sku||'':'')+(art?art.omschrijving||'':'')+r.naam).toLowerCase();
           if(!haystack.includes(q))return;
         }
-        alleSlots.push({sl,rek:r.naam,laagLabel,laagChar,vakNr,art,code:sl.code});
-      });
-    });
+        alleSlots.push({rek:r.naam,laagLabel,laagChar,vakNr,art,code});
+      }
+    }
   });
 
   if(!alleSlots.length){container.innerHTML='';emptyEl.style.display='block';return;}
   emptyEl.style.display='none';
 
-  // Sorteer: rek alfabetisch, dan laag, dan vak
   alleSlots.sort((a,b)=>a.code.localeCompare(b.code,undefined,{numeric:true}));
 
-  const rijen=alleSlots.map(({sl,rek,laagLabel,vakNr,art,code})=>{
+  const rijen=alleSlots.map(({rek,laagLabel,vakNr,art,code})=>{
     const isVrij=!art;
     return '<div class="loc-rij'+(isVrij?' loc-rij-vrij':'')+'">'
       // Links: locatiecode opgesplitst
@@ -747,25 +747,19 @@ function openSlotModal(slotId){
   openModal('slot-modal');
 }
 async function saveSlotArtikel(){
-  const artikelId=document.getElementById('slot-artikel-select').value||null;
-  const oldArt=artikelen.find(a=>a.locatie_slot_id===currentSlotId);
-  if(oldArt&&(!artikelId||oldArt.id!==artikelId))await sb.from('wms_artikelen').update({locatie_slot_id:null}).eq('id',oldArt.id);
-  await sb.from('wms_slots').update({artikel_id:artikelId}).eq('id',currentSlotId);
-  if(artikelId)await sb.from('wms_artikelen').update({locatie_slot_id:currentSlotId}).eq('id',artikelId);
-  await loadAll();closeModal('slot-modal');renderLocaties();showToast('Vak opgeslagen ✓');
+  // Slot-modal niet meer in gebruik (locatie via artikel-modal)
+  closeModal('slot-modal');
 }
 
 // ── ARTIKELEN ──
 function renderArtikelen(){
   const q=(document.getElementById('art-search').value||'').toLowerCase();
-  const allSlots=rekken.flatMap(r=>r.secties.flatMap(s=>s.slots));
   let list=artikelen;
   if(q)list=list.filter(a=>a.naam.toLowerCase().includes(q)||(a.sku||'').toLowerCase().includes(q)||(a.omschrijving||'').toLowerCase().includes(q)||levNaam(a.leverancier_id).toLowerCase().includes(q));
   const tbody=document.getElementById('artikelen-tbody'),emptyEl=document.getElementById('artikelen-empty');
   if(!list.length){tbody.innerHTML='';emptyEl.style.display='block';return;}
   emptyEl.style.display='none';
   tbody.innerHTML=list.map(a=>{
-    const slot=allSlots.find(s=>s.id===a.locatie_slot_id);
     const totaalSt=a.aantal_per_doos&&a.aantal_dozen?(a.aantal_per_doos*a.aantal_dozen)+' st':'';
     const voorraad=a.aantal_dozen!=null&&a.aantal_dozen!==''?a.aantal_dozen+' doos'+(totaalSt?' ('+totaalSt+')':''):'&#8212;';
     const foto=a.foto_url?'<img src="'+a.foto_url+'" style="width:36px;height:36px;object-fit:cover;border-radius:4px;border:1px solid var(--border)">':'<div style="width:36px;height:36px;background:var(--bg);border-radius:4px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:18px">&#128247;</div>';
@@ -774,7 +768,7 @@ function renderArtikelen(){
       '<td style="color:var(--muted);font-size:12px">'+(a.sku||'&#8212;')+'</td>'+
       '<td><div style="font-weight:600">'+a.naam+'</div>'+(a.omschrijving?'<div style="color:var(--muted);font-size:12px">'+a.omschrijving+'</div>':'')+'</td>'+
       '<td>'+(a.leverancier_id?'<span class="sup-badge">'+levNaam(a.leverancier_id)+'</span>':'<span style="color:var(--muted)">&#8212;</span>')+'</td>'+
-      '<td>'+(slot?'<span class="loc-badge">&#128205; '+slot.code+'</span>':'<span class="loc-empty">niet toegewezen</span>')+'</td>'+
+      '<td>'+(a.locatie?'<span class="loc-badge">&#128205; '+a.locatie+'</span>':'<span class="loc-empty">niet toegewezen</span>')+'</td>'+
       '<td style="font-size:12px"><div style="font-weight:600">'+voorraad+'</div>'+(a.gewicht||a.afmeting?'<div style="color:var(--muted);font-size:11px">'+(a.gewicht?a.gewicht+'kg ':'')+( a.afmeting||'')+'</div>':'')+'</td>'+
       '<td style="text-align:right;white-space:nowrap"><button class="btn-sm" style="margin-right:6px" data-id="'+a.id+'" onclick="openArtikelModal(this.dataset.id)">Bewerken</button><button class="btn-danger" data-id="'+a.id+'" onclick="deleteArtikel(this.dataset.id)">Verwijder</button></td>'+
     '</tr>';
@@ -813,42 +807,52 @@ function openArtikelModal(id){
   const vakSel=document.getElementById('art-vak-select');
   laagSel.innerHTML='<option value="">-- laag --</option>';laagSel.disabled=true;
   vakSel.innerHTML='<option value="">-- vak --</option>';vakSel.disabled=true;
-  if(a&&a.locatie_slot_id){
-    // Zoek het slot en vul alle 3 dropdowns in
-    for(const r of rekken){for(const sec of r.secties){const sl=sec.slots.find(s=>s.id===a.locatie_slot_id);if(sl){
-      rekSel.value=r.id;
+  if(a&&a.locatie){
+    // Herstel de 3 dropdowns vanuit de opgeslagen locatiecode (bijv. "A101")
+    const locCode=a.locatie;
+    // Zoek het rek waarvan de naam een prefix is van de locatiecode
+    const matchRek=rekken.find(r=>locCode.toLowerCase().startsWith(r.naam.toLowerCase()));
+    if(matchRek){
+      rekSel.value=matchRek.id;
       // Vul laag dropdown
-      const maxLagen=Math.max(...r.secties.map(s2=>s2.lagen));
-      laagSel.innerHTML='<option value="">-- laag --</option>';
-      for(let l=0;l<maxLagen;l++){const lb=l===0?'Vloer (0)':'Laag '+l;laagSel.innerHTML+='<option value="'+l+'">'+lb+'</option>';}
+      const maxLagen=Math.max(...matchRek.secties.map(s=>s.lagen));
+      for(let l=0;l<maxLagen;l++){
+        const opt=document.createElement('option');
+        opt.value=l;opt.textContent=l===0?'Vloer (0)':'Laag '+l;
+        laagSel.appendChild(opt);
+      }
       laagSel.disabled=false;
-      // Bepaal de laag uit de slotcode
-      const{laag:slotLaag,vak:slotVak}=slotLaagVak(sl,r.naam);
+      // Laag uit de code
+      const rest=locCode.slice(matchRek.naam.length);
+      const slotLaag=parseInt(rest[0])||0;
       laagSel.value=String(slotLaag);
-      // Vul vak dropdown voor deze laag
-      const vakken2=[];
-      r.secties.forEach(sec2=>sec2.slots.forEach(sl2=>{
-        const{laag:sl2Laag,vak:sl2Vak}=slotLaagVak(sl2,r.naam);
-        if(sl2Laag===slotLaag)vakken2.push({sl:sl2,vak:sl2Vak});
-      }));
-      vakken2.sort((a2,b2)=>a2.vak.localeCompare(b2.vak));
-      vakSel.innerHTML='<option value="">-- vak --</option>';
-      vakken2.forEach(({sl:sl2,vak:sl2Vak})=>{const bezet2=sl2.artikel_id&&sl2.id!==sl.id?' (bezet)':'';vakSel.innerHTML+='<option value="'+sl2.id+'" data-code="'+sl2.code+'"'+(sl2.artikel_id&&sl2.id!==sl.id?' style="color:var(--muted)"':'')+'>'+sl2Vak+bezet2+'</option>';});
+      // Vak dropdown
+      const totalPlaatsen=matchRek.secties.reduce((s,sec)=>s+sec.per_laag,0);
+      const gebruikteCodes=new Set(artikelen.filter(ar=>ar.locatie&&ar.locatie.toLowerCase().startsWith(matchRek.naam.toLowerCase())&&ar.id!==a.id).map(ar=>ar.locatie.toLowerCase()));
+      for(let pos=1;pos<=totalPlaatsen;pos++){
+        const code=matchRek.naam+slotLaag+String(pos).padStart(2,'0');
+        const inGebruik=gebruikteCodes.has(code.toLowerCase());
+        const opt=document.createElement('option');
+        opt.value=code;opt.textContent=String(pos).padStart(2,'0')+(inGebruik?' (bezet)':'');
+        if(inGebruik)opt.style.color='var(--muted)';
+        vakSel.appendChild(opt);
+      }
       vakSel.disabled=false;
-      vakSel.value=sl.id;
-      document.getElementById('art-locatie').value=sl.id;
-      document.getElementById('art-gekozen-slot').textContent=sl.code;
-      updateArtikelVisueel();break;
-    }}}
+      vakSel.value=locCode;
+      document.getElementById('art-locatie').value=locCode;
+      document.getElementById('art-gekozen-slot').textContent=locCode;
+      renderLokatiePinSVG(matchRek,locCode);
+    }
   }
   openModal('artikel-modal');
 }
 
 // ── LOCATIE DROPDOWNS (Rek → Laag → Vak) ──
+// Locatie wordt opgeslagen als tekst (bijv. "A101") in wms_artikelen.locatie
+// Geen aparte slots-tabel vereist voor de koppeling
+
 function onRekSelect(){
   const rekId=document.getElementById('art-rek-select').value;
-  populateSectieSelect(rekId,null);
-  // Reset laag en vak
   const laagSel=document.getElementById('art-laag-select');
   const vakSel=document.getElementById('art-vak-select');
   laagSel.innerHTML='<option value="">-- laag --</option>';
@@ -861,23 +865,14 @@ function onRekSelect(){
   if(!rekId)return;
   const rek=rekken.find(r=>r.id===rekId);
   if(!rek||!rek.secties.length)return;
-  // Verzamel alle unieke lagen van dit rek
   const maxLagen=Math.max(...rek.secties.map(s=>s.lagen));
-  laagSel.innerHTML='<option value="">-- laag --</option>';
   for(let l=0;l<maxLagen;l++){
-    const label=l===0?'Vloer (0)':'Laag '+l;
-    laagSel.innerHTML+='<option value="'+l+'">'+label+'</option>';
+    const opt=document.createElement('option');
+    opt.value=l;
+    opt.textContent=l===0?'Vloer (0)':'Laag '+l;
+    laagSel.appendChild(opt);
   }
   laagSel.disabled=false;
-}
-
-function slotLaagVak(sl,rekNaam){
-  // Code formaat: reknaam (variabele lengte) + laag (1 cijfer) + vak (2 cijfers)
-  // Gebruik toLowerCase voor robuuste matching
-  const rest=sl.code.toLowerCase().slice(rekNaam.toLowerCase().length); // bijv. "101" of "001"
-  const laag=parseInt(rest[0]??'0');
-  const vak=rest.slice(1); // laatste 2 cijfers
-  return{laag,vak};
 }
 
 function onLaagSelect(){
@@ -893,41 +888,45 @@ function onLaagSelect(){
   const rek=rekken.find(r=>r.id===rekId);
   if(!rek)return;
   const laagNum=parseInt(laag);
-  const alleSlots=rek.secties.flatMap(s=>s.slots);
-  // Als er geen slots zijn: toon duidelijke melding
-  if(alleSlots.length===0){
-    vakSel.innerHTML='<option value="">⚠️ Geen slots — ga naar Rekken & Secties</option>';
-    return;
-  }
-  const vakken=[];
-  rek.secties.forEach(sec=>{
-    sec.slots.forEach(sl=>{
-      const{laag:slLaag,vak}=slotLaagVak(sl,rek.naam);
-      if(slLaag===laagNum)vakken.push({sl,vak});
-    });
-  });
-  vakken.sort((a,b)=>a.vak.localeCompare(b.vak));
-  if(vakken.length===0){
-    // Toon alle beschikbare lagen als hint
-    const aanwezigelagen=[...new Set(alleSlots.map(sl=>slotLaagVak(sl,rek.naam).laag))].sort();
-    vakSel.innerHTML='<option value="">Geen vakken op laag '+laagNum+' (beschikbaar: '+aanwezigelagen.join(',')+')</option>';
-    return;
-  }
+  // Bereken alle mogelijke vakposities uit de rek-configuratie
+  // Totale plaatsen = som van per_laag over alle secties
+  const totalPlaatsen=rek.secties.reduce((s,sec)=>s+sec.per_laag,0);
+  // Welke locatiecodes zijn al in gebruik?
+  const gebruikteCodes=new Set(artikelen.filter(a=>a.locatie&&a.locatie.toLowerCase().startsWith(rek.naam.toLowerCase())).map(a=>a.locatie.toLowerCase()));
   vakSel.innerHTML='<option value="">-- kies vak --</option>';
-  vakken.forEach(({sl,vak})=>{
-    const bezet=sl.artikel_id?' (bezet)':'';
-    vakSel.innerHTML+='<option value="'+sl.id+'" data-code="'+sl.code+'"'+(sl.artikel_id?' style="color:var(--muted)"':'')+'>'+vak+bezet+'</option>';
-  });
+  for(let pos=1;pos<=totalPlaatsen;pos++){
+    const code=rek.naam+laagNum+String(pos).padStart(2,'0');
+    const inGebruik=gebruikteCodes.has(code.toLowerCase());
+    const opt=document.createElement('option');
+    opt.value=code;
+    opt.textContent=String(pos).padStart(2,'0')+(inGebruik?' (bezet)':'');
+    if(inGebruik)opt.style.color='var(--muted)';
+    vakSel.appendChild(opt);
+  }
   vakSel.disabled=false;
 }
 
 function onVakSelect(){
   const vakSel=document.getElementById('art-vak-select');
-  const slotId=vakSel.value;
-  const slotCode=vakSel.options[vakSel.selectedIndex]?.dataset?.code||'';
-  document.getElementById('art-locatie').value=slotId||'';
-  document.getElementById('art-gekozen-slot').textContent=slotCode?slotCode:'';
-  updateArtikelVisueel();
+  const code=vakSel.value;
+  document.getElementById('art-locatie').value=code;
+  const badge=document.getElementById('art-gekozen-slot');
+  badge.textContent=code||'';
+  if(code){
+    const rekId=document.getElementById('art-rek-select').value;
+    const rek=rekken.find(r=>r.id===rekId);
+    if(rek)renderLokatiePinSVG(rek,code);
+    else document.getElementById('art-visueel-wrap').style.display='none';
+  } else {
+    document.getElementById('art-visueel-wrap').style.display='none';
+  }
+}
+
+function renderLokatiePinSVG(rek,highlightCode){
+  const wrap=document.getElementById('art-visueel-wrap');
+  const svgWrap=document.getElementById('art-visueel-svg-wrap');
+  wrap.style.display='block';
+  svgWrap.innerHTML=buildRekHTML(rek,highlightCode,false);
 }
 
 function populateSectieSelect(rekId,selectedSecId){
@@ -955,13 +954,13 @@ async function saveArtikel(){
   const naam=document.getElementById('art-naam').value.trim();
   if(!naam){showToast('Naam is verplicht',true);return;}
   const id=document.getElementById('artikel-id').value;
-  const slotId=document.getElementById('art-locatie').value||null;
+  const locatie=document.getElementById('art-locatie').value.trim()||null;
   const payload={
     sku:document.getElementById('art-sku').value.trim()||null,
     naam,
     omschrijving:document.getElementById('art-omschrijving').value.trim()||null,
     leverancier_id:document.getElementById('art-leverancier').value||null,
-    locatie_slot_id:slotId,
+    locatie:locatie,
     notitie:document.getElementById('art-notitie').value.trim()||null,
     aantal_per_doos:parseInt(document.getElementById('art-per-doos').value)||null,
     aantal_dozen:parseInt(document.getElementById('art-dozen').value)||null,
@@ -970,21 +969,14 @@ async function saveArtikel(){
     foto_url:document.getElementById('art-foto-url').value||null,
   };
   if(id){
-    const oldArt=artikelen.find(a=>a.id===id);
-    if(oldArt&&oldArt.locatie_slot_id&&oldArt.locatie_slot_id!==slotId)
-      await sb.from('wms_slots').update({artikel_id:null}).eq('id',oldArt.locatie_slot_id);
     await sb.from('wms_artikelen').update(payload).eq('id',id);
-    if(slotId)await sb.from('wms_slots').update({artikel_id:id}).eq('id',slotId);
   }else{
-    const{data:newArt}=await sb.from('wms_artikelen').insert(payload).select().single();
-    if(slotId&&newArt)await sb.from('wms_slots').update({artikel_id:newArt.id}).eq('id',slotId);
+    await sb.from('wms_artikelen').insert(payload);
   }
   await loadAll();closeModal('artikel-modal');renderArtikelen();showToast('Artikel opgeslagen ✓');
 }
 async function deleteArtikel(id){
   if(!confirm('Artikel verwijderen?'))return;
-  const art=artikelen.find(a=>a.id===id);
-  if(art&&art.locatie_slot_id)await sb.from('wms_slots').update({artikel_id:null}).eq('id',art.locatie_slot_id);
   await sb.from('wms_artikelen').delete().eq('id',id);
   await loadAll();renderArtikelen();showToast('Artikel verwijderd');
 }
@@ -994,21 +986,16 @@ function renderZoeken(){
   const q=(document.getElementById('global-search').value||'').toLowerCase().trim();
   const container=document.getElementById('zoeken-results');
   if(!q){container.innerHTML='<p style="color:var(--muted)">Begin met typen om te zoeken...</p>';return;}
-  const allSlots=rekken.flatMap(r=>r.secties.flatMap(s=>s.slots));
-  const arts=artikelen.filter(a=>a.naam.toLowerCase().includes(q)||(a.sku||'').toLowerCase().includes(q)||(a.omschrijving||'').toLowerCase().includes(q)||levNaam(a.leverancier_id).toLowerCase().includes(q));
-  const slots=allSlots.filter(s=>s.code.toLowerCase().includes(q));
+  const arts=artikelen.filter(a=>a.naam.toLowerCase().includes(q)||(a.sku||'').toLowerCase().includes(q)||(a.omschrijving||'').toLowerCase().includes(q)||(a.locatie||'').toLowerCase().includes(q)||levNaam(a.leverancier_id).toLowerCase().includes(q));
+  // Zoek ook op locatiecode in artikelen
+  const locArts=artikelen.filter(a=>a.locatie&&a.locatie.toLowerCase().includes(q)&&!arts.find(b=>b.id===a.id));
   let html='';
   if(arts.length){
     html+='<div class="card" style="margin-bottom:16px"><div class="card-title">📦 Artikelen ('+arts.length+')</div><div class="table-wrap"><table><thead><tr><th>SKU</th><th>Naam</th><th>Locatie</th><th>Leverancier</th></tr></thead><tbody>'+
-      arts.map(a=>{const slot=allSlots.find(s=>s.id===a.locatie_slot_id);return '<tr><td style="color:var(--muted)">'+(a.sku||'—')+'</td><td style="font-weight:600">'+a.naam+'</td><td>'+(slot?'<span class="loc-badge">📍 '+slot.code+'</span>':'<span class="loc-empty">niet toegewezen</span>')+'</td><td>'+(a.leverancier_id?'<span class="sup-badge">'+levNaam(a.leverancier_id)+'</span>':'—')+'</td></tr>';}).join('')+
+      arts.map(a=>{return '<tr><td style="color:var(--muted)">'+(a.sku||'—')+'</td><td style="font-weight:600">'+a.naam+'</td><td>'+(a.locatie?'<span class="loc-badge">📍 '+a.locatie+'</span>':'<span class="loc-empty">niet toegewezen</span>')+'</td><td>'+(a.leverancier_id?'<span class="sup-badge">'+levNaam(a.leverancier_id)+'</span>':'—')+'</td></tr>';}).join('')+
       '</tbody></table></div></div>';
   }
-  if(slots.length){
-    html+='<div class="card"><div class="card-title">📍 Locaties ('+slots.length+')</div><div class="table-wrap"><table><thead><tr><th>Code</th><th>Artikel</th><th>SKU</th></tr></thead><tbody>'+
-      slots.map(s=>{const art=artikelen.find(a=>a.id===s.artikel_id);return '<tr><td><span class="loc-badge">📍 '+s.code+'</span></td><td style="font-weight:600">'+(art?art.naam:'<span style="color:var(--muted);font-style:italic">Leeg</span>')+'</td><td style="color:var(--muted)">'+(art?(art.sku||'—'):'')+'</td></tr>';}).join('')+
-      '</tbody></table></div></div>';
-  }
-  if(!arts.length&&!slots.length)html='<div class="empty-state"><div class="icon">🔍</div><p>Geen resultaten voor "<strong>'+q+'</strong>"</p></div>';
+  if(!arts.length)html='<div class="empty-state"><div class="icon">🔍</div><p>Geen resultaten voor "<strong>'+q+'</strong>"</p></div>';
   container.innerHTML=html;
 }
 
