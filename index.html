@@ -985,9 +985,27 @@ async function saveArtikel(){
     foto_url:document.getElementById('art-foto-url').value||null,
   };
   if(id){
-    await sb.from('wms_artikelen').update(payload).eq('id',id);
+    const{error}=await sb.from('wms_artikelen').update(payload).eq('id',id);
+    if(error){
+      console.error('Supabase update error:',error);
+      if(error.message&&error.message.includes('locatie')){
+        showToast('Kolom "locatie" ontbreekt in Supabase. Voer dit SQL uit:\nALTER TABLE wms_artikelen ADD COLUMN locatie text;',true);
+      } else {
+        showToast('Opslaan mislukt: '+error.message,true);
+      }
+      return;
+    }
   }else{
-    await sb.from('wms_artikelen').insert(payload);
+    const{error}=await sb.from('wms_artikelen').insert(payload);
+    if(error){
+      console.error('Supabase insert error:',error);
+      if(error.message&&error.message.includes('locatie')){
+        showToast('Kolom "locatie" ontbreekt in Supabase. Voer dit SQL uit:\nALTER TABLE wms_artikelen ADD COLUMN locatie text;',true);
+      } else {
+        showToast('Opslaan mislukt: '+error.message,true);
+      }
+      return;
+    }
   }
   await loadAll();closeModal('artikel-modal');renderArtikelen();showToast('Artikel opgeslagen ✓');
 }
