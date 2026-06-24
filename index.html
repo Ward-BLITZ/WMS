@@ -971,40 +971,60 @@ async function saveArtikel(){
   if(!naam){showToast('Naam is verplicht',true);return;}
   const id=document.getElementById('artikel-id').value;
   const locatie=document.getElementById('art-locatie').value.trim()||null;
-  const payload={
+
+  // Basisvelden — bestaan zeker in Supabase (originele tabel)
+  const basis={
     sku:document.getElementById('art-sku').value.trim()||null,
     naam,
     omschrijving:document.getElementById('art-omschrijving').value.trim()||null,
     leverancier_id:document.getElementById('art-leverancier').value||null,
-    locatie:locatie,
     notitie:document.getElementById('art-notitie').value.trim()||null,
+  };
+
+  // Uitgebreide velden — worden stap voor stap toegevoegd
+  // Sla ze op in een apart object en voeg toe na migratie
+  const extra={
+    locatie,
     aantal_per_doos:parseInt(document.getElementById('art-per-doos').value)||null,
     aantal_dozen:parseInt(document.getElementById('art-dozen').value)||null,
     gewicht:parseFloat(document.getElementById('art-gewicht').value)||null,
     afmeting:document.getElementById('art-afmeting').value.trim()||null,
     foto_url:document.getElementById('art-foto-url').value||null,
   };
+
+  // Probeer eerst met alle velden
+  const payload={...basis,...extra};
+  let artikelId=id;
+
   if(id){
-    const{error}=await sb.from('wms_artikelen').update(payload).eq('id',id);
+    let{error}=await sb.from('wms_artikelen').update(payload).eq('id',id);
     if(error){
-      console.error('Supabase update error:',error);
-      if(error.message&&error.message.includes('locatie')){
-        showToast('Kolom "locatie" ontbreekt in Supabase. Voer dit SQL uit:\nALTER TABLE wms_artikelen ADD COLUMN locatie text;',true);
-      } else {
-        showToast('Opslaan mislukt: '+error.message,true);
+      // Fallback: probeer enkel basisvelden + locatie
+      const payload2={...basis,locatie};
+      let{error:e2}=await sb.from('wms_artikelen').update(payload2).eq('id',id);
+      if(e2){
+        // Laatste fallback: enkel basisvelden
+        let{error:e3}=await sb.from('wms_artikelen').update(basis).eq('id',id);
+        if(e3){showToast('Opslaan mislukt: '+e3.message,true);return;}
+        showToast('Basisgegevens opgeslagen. Voer dit SQL uit in Supabase om alle velden te activeren:\nALTER TABLE wms_artikelen ADD COLUMN IF NOT EXISTS locatie text, ADD COLUMN IF NOT EXISTS aantal_per_doos int, ADD COLUMN IF NOT EXISTS aantal_dozen int, ADD COLUMN IF NOT EXISTS gewicht numeric, ADD COLUMN IF NOT EXISTS afmeting text, ADD COLUMN IF NOT EXISTS foto_url text;',true);
+        await loadAll();closeModal('artikel-modal');renderArtikelen();return;
       }
-      return;
+      showToast('Opgeslagen (locatie actief). Voer SQL uit voor volledige velden.',false);
+      await loadAll();closeModal('artikel-modal');renderArtikelen();return;
     }
   }else{
-    const{error}=await sb.from('wms_artikelen').insert(payload);
+    let{data,error}=await sb.from('wms_artikelen').insert(payload).select().single();
     if(error){
-      console.error('Supabase insert error:',error);
-      if(error.message&&error.message.includes('locatie')){
-        showToast('Kolom "locatie" ontbreekt in Supabase. Voer dit SQL uit:\nALTER TABLE wms_artikelen ADD COLUMN locatie text;',true);
-      } else {
-        showToast('Opslaan mislukt: '+error.message,true);
+      const payload2={...basis,locatie};
+      let{data:d2,error:e2}=await sb.from('wms_artikelen').insert(payload2).select().single();
+      if(e2){
+        let{data:d3,error:e3}=await sb.from('wms_artikelen').insert(basis).select().single();
+        if(e3){showToast('Opslaan mislukt: '+e3.message,true);return;}
+        showToast('Basisgegevens opgeslagen. Voer SQL uit in Supabase om alle velden te activeren.',true);
+        await loadAll();closeModal('artikel-modal');renderArtikelen();return;
       }
-      return;
+      showToast('Opgeslagen (locatie actief). Voer SQL uit voor volledige velden.',false);
+      await loadAll();closeModal('artikel-modal');renderArtikelen();return;
     }
   }
   await loadAll();closeModal('artikel-modal');renderArtikelen();showToast('Artikel opgeslagen ✓');
