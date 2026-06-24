@@ -215,11 +215,11 @@ tr:hover td{background:var(--bg);}
       <div class="nav-item" onclick="setPage('locaties')" id="nav-locaties"><span class="nav-icon">📍</span> Locaties</div>
       <div class="nav-item" onclick="setPage('artikelen')" id="nav-artikelen"><span class="nav-icon">📦</span> Artikelen</div>
       <div class="nav-item" onclick="setPage('zoeken')" id="nav-zoeken"><span class="nav-icon">🔍</span> Zoeken</div>
-      <div class="nav-item" onclick="setPage('grondplan')" id="nav-grondplan"><span class="nav-icon">🗺️</span> Grondplan</div>
       <div id="nav-admin-section" style="display:none">
         <div class="sidebar-section">Beheer</div>
         <div class="nav-item" onclick="setPage('rekken')" id="nav-rekken"><span class="nav-icon">🗄️</span> Rekken & Secties</div>
         <div class="nav-item" onclick="setPage('leveranciers')" id="nav-leveranciers"><span class="nav-icon">🏭</span> Leveranciers</div>
+        <div class="nav-item" onclick="setPage('grondplan')" id="nav-grondplan"><span class="nav-icon">🗺️</span> Grondplan</div>
       </div>
     </div>
     <div class="content">
@@ -529,6 +529,7 @@ async function loadGebouwen(){
 
 // ── NAV ──
 function setPage(page){
+  if(page==='grondplan'&&!isAdmin){showToast('Enkel admins kunnen het grondplan beheren',true);return;}
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('[id^="page-"]').forEach(p=>p.style.display='none');
   const nav=document.getElementById('nav-'+page);if(nav)nav.classList.add('active');
