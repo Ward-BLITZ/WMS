@@ -1005,6 +1005,31 @@ function renderZoeken(){
 }
 
 // ── ADMIN REKKEN ──
+
+async function herstelSlots(rekId){
+  const rek=rekken.find(r=>r.id===rekId);
+  if(!rek)return;
+  if(!confirm('Slots aanmaken voor rek '+rek.naam+'? Dit genereert vacatures op basis van de bestaande secties.'))return;
+  const start=1;
+  for(let i=0;i<rek.secties.length;i++){
+    const sec=rek.secties[i];
+    const lagen=sec.lagen;
+    const perLaag=sec.per_laag;
+    // Cumulatieve offset over vorige secties
+    const sectionOffset=rek.secties.slice(0,i).reduce((s,x)=>s+x.per_laag,0);
+    const slots=[];
+    for(let laag=0;laag<lagen;laag++){
+      for(let pos=0;pos<perLaag;pos++){
+        const globalPos=start+sectionOffset+pos;
+        const code=rek.naam+laag+String(globalPos).padStart(2,'0');
+        slots.push({sectie_id:sec.id,code,artikel_id:null});
+      }
+    }
+    if(slots.length)await sb.from('wms_slots').insert(slots);
+  }
+  await loadAll();renderAdminRekken();showToast('Slots aangemaakt voor rek '+rek.naam+' ✓');
+}
+
 function renderAdminRekken(){
   const container=document.getElementById('admin-rekken-container');
   const emptyEl=document.getElementById('rekken-empty');
@@ -1016,7 +1041,8 @@ function renderAdminRekken(){
     return '<div class="rek-blok">'+
       '<div class="rek-blok-header">'+
       '<div><div class="rek-blok-naam">Rek '+r.naam+'</div><div class="rek-blok-meta">'+r.secties.length+' sectie(s) · '+allSlots.length+' vakken · '+bezet+' bezet</div></div>'+
-      '<div style="display:flex;gap:8px">'+
+      '<div style="display:flex;gap:8px;align-items:center">'+
+      (allSlots.length===0&&r.secties.length>0?'<button class="btn-sm" style="border-color:#f59e0b;color:#92400e;background:#fef3c7" onclick="herstelSlots(\''+r.id+'\')">⚠️ Herstel slots</button>':'')+
       '<button class="btn-sm" onclick="addSectieToRek(\''+r.id+'\',\''+r.naam+'\')">+ Sectie</button>'+
       '<button class="btn-danger" onclick="deleteRek(\''+r.id+'\')">✕ Verwijder</button>'+
       '</div></div>'+
